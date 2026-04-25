@@ -1,0 +1,232 @@
+
+<style>
+.prog-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.prog-table th { font-weight: 500; font-size: 12px; color: var(--color-text-secondary); text-align: left; padding: 8px 12px; border-bottom: 0.5px solid var(--color-border-secondary); white-space: nowrap; }
+.prog-table td { padding: 10px 12px; border-bottom: 0.5px solid var(--color-border-tertiary); vertical-align: top; color: var(--color-text-primary); line-height: 1.5; }
+.prog-table tr:last-child td { border-bottom: none; }
+.prog-table tr:hover td { background: var(--color-background-secondary); }
+.name { font-weight: 500; font-size: 13px; white-space: nowrap; }
+.author { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
+.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; white-space: nowrap; margin: 2px 2px 2px 0; }
+.badge-vol { background: #E6F1FB; color: #0C447C; }
+.badge-int { background: #FAECE7; color: #712B13; }
+.badge-str { background: #EAF3DE; color: #27500A; }
+.badge-hyp { background: #EEEDFE; color: #3C3489; }
+.badge-end { background: #E1F5EE; color: #085041; }
+.pro { color: var(--color-text-success); font-size: 12px; }
+.con { color: var(--color-text-danger); font-size: 12px; }
+.dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; flex-shrink: 0; }
+.dot-pro { background: var(--color-text-success); }
+.dot-con { background: var(--color-text-danger); }
+.level { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+.lv-beg { background: #E1F5EE; color: #085041; }
+.lv-int { background: #FAEEDA; color: #633806; }
+.lv-adv { background: #FAECE7; color: #712B13; }
+.lv-all { background: #F1EFE8; color: #444441; }
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.filter-btn { font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+.filter-btn.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); }
+</style>
+
+<div class="filter-row" id="filters">
+  <button class="filter-btn active" onclick="filter('all')">All</button>
+  <button class="filter-btn" onclick="filter('strength')">Strength</button>
+  <button class="filter-btn" onclick="filter('hypertrophy')">Hypertrophy</button>
+  <button class="filter-btn" onclick="filter('volume')">Volume</button>
+  <button class="filter-btn" onclick="filter('intensity')">Intensity / HIT</button>
+  <button class="filter-btn" onclick="filter('endurance')">Endurance</button>
+</div>
+
+<div style="overflow-x: auto;">
+<table class="prog-table" id="table">
+  <thead>
+    <tr>
+      <th style="min-width:140px">Program</th>
+      <th style="min-width:80px">Level</th>
+      <th style="min-width:120px">Focus</th>
+      <th style="min-width:200px">Description</th>
+      <th style="min-width:160px">Pros</th>
+      <th style="min-width:160px">Cons</th>
+      <th style="min-width:90px">Freq.</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+</div>
+
+<script>
+const programs = [
+  {
+    name: "Mike Mentzer HIT",
+    author: "Mike Mentzer",
+    tags: ["intensity"],
+    level: "adv", levelLabel: "Advanced",
+    focus: ["intensity"],
+    desc: "One working set to absolute failure per exercise. Full recovery between sessions. Maximum intensity, minimum volume.",
+    pros: ["Time efficient", "Clear progress signal", "Avoids overtraining"],
+    cons: ["High injury risk", "Hard to self-regulate", "Not for beginners"]
+  },
+  {
+    name: "5×5 StrongLifts",
+    author: "Mehdi Hadj",
+    tags: ["strength"],
+    level: "beg", levelLabel: "Beginner",
+    focus: ["strength"],
+    desc: "5 sets of 5 reps on compound lifts (squat, bench, deadlift). Linear progression — add weight every session.",
+    pros: ["Simple to follow", "Fast strength gains", "Battle-tested"],
+    cons: ["Plateau hits fast", "Limited upper body", "No hypertrophy focus"]
+  },
+  {
+    name: "Starting Strength",
+    author: "Mark Rippetoe",
+    tags: ["strength"],
+    level: "beg", levelLabel: "Beginner",
+    focus: ["strength"],
+    desc: "3 days/week, barbell-only. Squat every session. Focuses on neuromuscular strength via linear progression.",
+    pros: ["Excellent for novices", "Rapid strength gains", "Clear technique focus"],
+    cons: ["Very barbell-centric", "Low variety", "Squats every session"]
+  },
+  {
+    name: "PHAT",
+    author: "Layne Norton",
+    tags: ["strength","hypertrophy"],
+    level: "int", levelLabel: "Intermediate",
+    focus: ["strength","hypertrophy"],
+    desc: "Power Hypertrophy Adaptive Training. 2 power days + 3 hypertrophy days. Bridges the gap between strength and muscle.",
+    pros: ["Best of both worlds", "High frequency", "Good for intermediate lifters"],
+    cons: ["5 days/week commitment", "Complex programming", "High recovery demand"]
+  },
+  {
+    name: "German Volume Training",
+    author: "Charles Poliquin",
+    tags: ["volume","hypertrophy"],
+    level: "int", levelLabel: "Intermediate",
+    focus: ["volume","hypertrophy"],
+    desc: "10 sets of 10 reps on a single exercise per muscle group. Extreme volume shock for hypertrophy.",
+    pros: ["Massive hypertrophy stimulus", "Simple structure", "Breaks plateaus"],
+    cons: ["Very fatiguing", "Long sessions", "Risk of overuse injury"]
+  },
+  {
+    name: "Push / Pull / Legs",
+    author: "Various",
+    tags: ["hypertrophy","volume"],
+    level: "int", levelLabel: "Intermediate",
+    focus: ["hypertrophy","volume"],
+    desc: "Split by movement pattern: push muscles (chest/shoulders/triceps), pull (back/biceps), legs. 6-day or 3-day version.",
+    pros: ["Balanced muscle development", "Flexible frequency", "Very popular — lots of resources"],
+    cons: ["6-day version demanding", "Less compound focus", "Can neglect weak points"]
+  },
+  {
+    name: "5/3/1",
+    author: "Jim Wendler",
+    tags: ["strength"],
+    level: "int", levelLabel: "Intermediate",
+    focus: ["strength"],
+    desc: "4-week cycles on the big 4 lifts. Percentages based on training max. Slow, sustainable long-term progress.",
+    pros: ["Long-term sustainable", "Built-in deload", "Excellent for raw strength"],
+    cons: ["Slow progression", "Needs accessory planning", "Not hypertrophy-focused"]
+  },
+  {
+    name: "Westside Barbell",
+    author: "Louie Simmons",
+    tags: ["strength","intensity"],
+    level: "adv", levelLabel: "Advanced",
+    focus: ["strength","intensity"],
+    desc: "Max effort + dynamic effort days. Conjugate periodisation — trains multiple strength qualities simultaneously.",
+    pros: ["Elite-level strength gains", "High variety", "Avoids adaptation"],
+    cons: ["Very complex", "Equipment-heavy", "Designed for powerlifters"]
+  },
+  {
+    name: "Dorian Yates HIT",
+    author: "Dorian Yates",
+    tags: ["intensity","hypertrophy"],
+    level: "adv", levelLabel: "Advanced",
+    focus: ["intensity","hypertrophy"],
+    desc: "Low volume, high intensity. 1-2 all-out sets per exercise with forced reps and negatives. Yates row iconic.",
+    pros: ["Extreme muscle density", "Time efficient", "Works for hard gainers"],
+    cons: ["High injury risk", "Needs a training partner", "Not beginner-safe"]
+  },
+  {
+    name: "Arnold Split",
+    author: "Arnold Schwarzenegger",
+    tags: ["volume","hypertrophy"],
+    level: "int", levelLabel: "Intermediate",
+    focus: ["volume","hypertrophy"],
+    desc: "6-day split: chest+back / shoulders+arms / legs, repeated twice. High volume, classic bodybuilding aesthetics.",
+    pros: ["Proven for hypertrophy", "High frequency per muscle", "Classic aesthetic result"],
+    cons: ["6 days/week required", "No clear periodisation", "Recovery-intensive"]
+  },
+  {
+    name: "Juggernaut Method",
+    author: "Chad Wesley Smith",
+    tags: ["strength","volume"],
+    level: "int", levelLabel: "Intermediate",
+    focus: ["strength","volume"],
+    desc: "Wave-based periodisation: accumulation, intensification, realisation, deload. Great for athletes crossing into strength.",
+    pros: ["Athlete-friendly", "Built-in periodisation", "Develops work capacity"],
+    cons: ["Complex tracking", "Long program cycles", "Needs planning ahead"]
+  },
+  {
+    name: "HIIT / Metabolic",
+    author: "Various",
+    tags: ["endurance","intensity"],
+    level: "all", levelLabel: "All levels",
+    focus: ["endurance","intensity"],
+    desc: "Short intense intervals alternating with recovery. Primarily cardio/fat loss but adaptable with weights (circuit training).",
+    pros: ["Time efficient", "Great for fat loss", "Scalable intensity"],
+    cons: ["Limited strength gains", "High cortisol if overdone", "Not for muscle building"]
+  }
+];
+
+const focusBadge = {
+  strength: '<span class="badge badge-str">Strength</span>',
+  hypertrophy: '<span class="badge badge-hyp">Hypertrophy</span>',
+  volume: '<span class="badge badge-vol">Volume</span>',
+  intensity: '<span class="badge badge-int">HIT</span>',
+  endurance: '<span class="badge badge-end">Endurance</span>'
+};
+
+const levelClass = { beg: 'lv-beg', int: 'lv-int', adv: 'lv-adv', all: 'lv-all' };
+
+function render(list) {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = list.map(p => `
+    <tr>
+      <td><div class="name">${p.name}</div><div class="author">${p.author}</div></td>
+      <td><span class="level ${levelClass[p.level]}">${p.levelLabel}</span></td>
+      <td>${p.focus.map(f => focusBadge[f]).join('')}</td>
+      <td style="font-size:12px;color:var(--color-text-secondary)">${p.desc}</td>
+      <td>${p.pros.map(x => `<div style="display:flex;align-items:flex-start;gap:4px;margin-bottom:3px"><span class="dot dot-pro"></span><span class="pro">${x}</span></div>`).join('')}</td>
+      <td>${p.cons.map(x => `<div style="display:flex;align-items:flex-start;gap:4px;margin-bottom:3px"><span class="dot dot-con"></span><span class="con">${x}</span></div>`).join('')}</td>
+      <td style="font-size:12px;color:var(--color-text-secondary)">${freqLabel(p)}</td>
+    </tr>
+  `).join('');
+}
+
+function freqLabel(p) {
+  const map = {
+    "Mike Mentzer HIT": "2–3×/wk",
+    "5×5 StrongLifts": "3×/wk",
+    "Starting Strength": "3×/wk",
+    "PHAT": "5×/wk",
+    "German Volume Training": "4×/wk",
+    "Push / Pull / Legs": "3–6×/wk",
+    "5/3/1": "3–4×/wk",
+    "Westside Barbell": "4×/wk",
+    "Dorian Yates HIT": "3–4×/wk",
+    "Arnold Split": "6×/wk",
+    "Juggernaut Method": "4×/wk",
+    "HIIT / Metabolic": "3–5×/wk"
+  };
+  return map[p.name] || "—";
+}
+
+function filter(tag) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  const list = tag === 'all' ? programs : programs.filter(p => p.tags.includes(tag));
+  render(list);
+}
+
+render(programs);
+</script>

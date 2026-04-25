@@ -1,0 +1,242 @@
+
+<style>
+* { box-sizing: border-box; }
+.phase { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); margin-bottom: 12px; overflow: hidden; }
+.phase-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; user-select: none; background: var(--color-background-secondary); }
+.phase-header:hover { background: var(--color-background-tertiary); }
+.phase-num { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.phase-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+.phase-meta { font-size: 12px; color: var(--color-text-tertiary); white-space: nowrap; }
+.phase-body { display: none; border-top: 0.5px solid var(--color-border-tertiary); }
+.phase-body.open { display: block; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.col { padding: 16px; }
+.col + .col { border-left: 0.5px solid var(--color-border-tertiary); }
+.col-head { font-size: 11px; font-weight: 500; letter-spacing: .04em; color: var(--color-text-secondary); margin-bottom: 10px; text-transform: uppercase; }
+.task { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px; font-size: 13px; color: var(--color-text-primary); line-height: 1.4; }
+.dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.deliverable { font-size: 12px; color: var(--color-text-secondary); padding: 10px 16px; border-top: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); }
+.deliverable span { font-weight: 500; color: var(--color-text-primary); }
+.chevron { font-size: 12px; color: var(--color-text-tertiary); transition: transform .2s; }
+.chevron.open { transform: rotate(90deg); }
+.p1 .phase-num { background: #E6F1FB; color: #0C447C; }
+.p1 .dot { background: #378ADD; }
+.p2 .phase-num { background: #EEEDFE; color: #3C3489; }
+.p2 .dot { background: #7F77DD; }
+.p3 .phase-num { background: #E1F5EE; color: #085041; }
+.p3 .dot { background: #1D9E75; }
+.p4 .phase-num { background: #FAEEDA; color: #633806; }
+.p4 .dot { background: #BA7517; }
+.p5 .phase-num { background: #FAECE7; color: #712B13; }
+.p5 .dot { background: #D85A30; }
+.p6 .phase-num { background: #F1EFE8; color: #444441; }
+.p6 .dot { background: #888780; }
+</style>
+
+<div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:16px;padding:0 2px">Click any phase to expand. Each phase = independently testable slice of FE + BE.</div>
+
+<div class="phase p1">
+  <div class="phase-header" onclick="toggle(this)">
+    <span class="phase-num">Phase 1</span>
+    <span class="phase-title">Auth foundation — JWT + roles</span>
+    <span class="phase-meta">~2–3 days</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="phase-body">
+    <div class="cols">
+      <div class="col">
+        <div class="col-head">Backend</div>
+        <div class="task"><span class="dot"></span>MySQL schema: users table (id, name, email, password_hash, role, created_at)</div>
+        <div class="task"><span class="dot"></span>POST /api/auth/register — bcrypt hash, return JWT</div>
+        <div class="task"><span class="dot"></span>POST /api/auth/login — verify password, return JWT</div>
+        <div class="task"><span class="dot"></span>GET /api/auth/me — protected, returns current user</div>
+        <div class="task"><span class="dot"></span>JWT middleware — authGuard for all protected routes</div>
+        <div class="task"><span class="dot"></span>Role field: user | coach | admin (even if unused now)</div>
+      </div>
+      <div class="col">
+        <div class="col-head">Frontend</div>
+        <div class="task"><span class="dot"></span>Nuxt route middleware: redirect to /login if no token</div>
+        <div class="task"><span class="dot"></span>useAuth composable — login(), register(), logout(), user ref</div>
+        <div class="task"><span class="dot"></span>Pinia authStore — persist JWT in localStorage</div>
+        <div class="task"><span class="dot"></span>/auth/register page — name, email, password form</div>
+        <div class="task"><span class="dot"></span>/auth/login page</div>
+        <div class="task"><span class="dot"></span>Axios interceptor — attach Bearer token to all requests</div>
+      </div>
+    </div>
+    <div class="deliverable"><span>Done when:</span> You can register, log in, hit a protected endpoint, and get 401 if no token. Roles stored but not enforced yet.</div>
+  </div>
+</div>
+
+<div class="phase p2">
+  <div class="phase-header" onclick="toggle(this)">
+    <span class="phase-num">Phase 2</span>
+    <span class="phase-title">User profile + onboarding setup screen</span>
+    <span class="phase-meta">~3–4 days</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="phase-body">
+    <div class="cols">
+      <div class="col">
+        <div class="col-head">Backend</div>
+        <div class="task"><span class="dot"></span>user_profiles table: user_id FK, gender, age, height, weight, goal, sport, level, equipment (JSON), days_per_week, session_duration, training_philosophy</div>
+        <div class="task"><span class="dot"></span>POST /api/profile/onboarding — create/upsert profile</div>
+        <div class="task"><span class="dot"></span>GET /api/profile — return current user's profile</div>
+        <div class="task"><span class="dot"></span>Validation: required fields, age range, weight range</div>
+        <div class="task"><span class="dot"></span>Flag: onboarding_completed boolean on users table</div>
+      </div>
+      <div class="col">
+        <div class="col-head">Frontend</div>
+        <div class="task"><span class="dot"></span>/onboarding multi-step page (7 steps, progress bar)</div>
+        <div class="task"><span class="dot"></span>Step 1: gender + age</div>
+        <div class="task"><span class="dot"></span>Step 2: height + weight</div>
+        <div class="task"><span class="dot"></span>Step 3: sport selection cards</div>
+        <div class="task"><span class="dot"></span>Step 4: fitness level</div>
+        <div class="task"><span class="dot"></span>Step 5: equipment checkboxes</div>
+        <div class="task"><span class="dot"></span>Step 6: training philosophy cards (HIT, PPL, 5×5, GVT…)</div>
+        <div class="task"><span class="dot"></span>Step 7: days/week + session duration</div>
+        <div class="task"><span class="dot"></span>useProfile composable — submit, fetch, store in Pinia</div>
+        <div class="task"><span class="dot"></span>Route guard: redirect to /onboarding if profile incomplete</div>
+      </div>
+    </div>
+    <div class="deliverable"><span>Done when:</span> New user registers → goes through 7-step onboarding → profile saved to DB → redirected to /home (empty for now).</div>
+  </div>
+</div>
+
+<div class="phase p3">
+  <div class="phase-header" onclick="toggle(this)">
+    <span class="phase-num">Phase 3</span>
+    <span class="phase-title">Exercise library sync from ExerciseDB</span>
+    <span class="phase-meta">~2 days</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="phase-body">
+    <div class="cols">
+      <div class="col">
+        <div class="col-head">Backend</div>
+        <div class="task"><span class="dot"></span>exercises table: id, name, target_muscle, secondary_muscles, equipment, difficulty, gif_url, instructions (JSON)</div>
+        <div class="task"><span class="dot"></span>One-time seed script: fetch all exercises from ExerciseDB API → store in MySQL</div>
+        <div class="task"><span class="dot"></span>GET /api/exercises — filter by muscle, equipment, level</div>
+        <div class="task"><span class="dot"></span>GET /api/exercises/:id — single exercise detail</div>
+        <div class="task"><span class="dot"></span>Index on target_muscle + equipment for fast filtering</div>
+      </div>
+      <div class="col">
+        <div class="col-head">Frontend</div>
+        <div class="task"><span class="dot"></span>No user-facing UI needed yet</div>
+        <div class="task"><span class="dot"></span>Verify endpoint works via browser / Postman</div>
+        <div class="task"><span class="dot"></span>Confirm GIF URLs load correctly in an img tag</div>
+      </div>
+    </div>
+    <div class="deliverable"><span>Done when:</span> 11K exercises seeded in DB. GET /api/exercises?muscle=quads&equipment=barbell returns filtered list with GIF URLs.</div>
+  </div>
+</div>
+
+<div class="phase p4">
+  <div class="phase-header" onclick="toggle(this)">
+    <span class="phase-num">Phase 4</span>
+    <span class="phase-title">Program generation engine + home screen</span>
+    <span class="phase-meta">~4–5 days</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="phase-body">
+    <div class="cols">
+      <div class="col">
+        <div class="col-head">Backend</div>
+        <div class="task"><span class="dot"></span>workout_programs table: id, user_id, sport, philosophy, level, week_structure (JSON), created_at</div>
+        <div class="task"><span class="dot"></span>program_days table: id, program_id, day_number, week_number, exercises (JSON array)</div>
+        <div class="task"><span class="dot"></span>ProgramGenerator service: muscle distribution map per sport + philosophy</div>
+        <div class="task"><span class="dot"></span>Exercise selector: filter by muscle %, equipment, level → pick top N</div>
+        <div class="task"><span class="dot"></span>Periodization builder: assign sets/reps/intensity per week phase</div>
+        <div class="task"><span class="dot"></span>Day distributor: spread exercises across chosen days/week</div>
+        <div class="task"><span class="dot"></span>POST /api/programs/generate — triggers full generation, returns program</div>
+        <div class="task"><span class="dot"></span>GET /api/programs/active — returns user's current program</div>
+        <div class="task"><span class="dot"></span>GET /api/workouts/today — returns today's exercise list with prescribed sets/reps/weight</div>
+      </div>
+      <div class="col">
+        <div class="col-head">Frontend</div>
+        <div class="task"><span class="dot"></span>/home page — shows current week, intensity phase, today's exercise list</div>
+        <div class="task"><span class="dot"></span>Each exercise card: name, target muscle, prescribed sets × reps @ weight</div>
+        <div class="task"><span class="dot"></span>"Start Workout" button → navigates to /workout</div>
+        <div class="task"><span class="dot"></span>useProgram composable — fetch active program, today's session</div>
+        <div class="task"><span class="dot"></span>Auto-trigger program generation after onboarding if no active program</div>
+        <div class="task"><span class="dot"></span>Loading state while program generates</div>
+      </div>
+    </div>
+    <div class="deliverable"><span>Done when:</span> After onboarding, /home shows a real 8-week program. Today's workout is listed with correct exercises filtered by sport + equipment + philosophy.</div>
+  </div>
+</div>
+
+<div class="phase p5">
+  <div class="phase-header" onclick="toggle(this)">
+    <span class="phase-num">Phase 5</span>
+    <span class="phase-title">Workout logging + progression detection</span>
+    <span class="phase-meta">~3–4 days</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="phase-body">
+    <div class="cols">
+      <div class="col">
+        <div class="col-head">Backend</div>
+        <div class="task"><span class="dot"></span>workout_logs table: id, user_id, program_day_id, duration_sec, completed_at</div>
+        <div class="task"><span class="dot"></span>exercise_logs table: id, workout_log_id, exercise_id, sets_done, reps_done, weight_done, sets_prescribed, reps_prescribed, weight_prescribed, rpe, notes, progression_status</div>
+        <div class="task"><span class="dot"></span>POST /api/logs/exercise — save single exercise log, run progression detection</div>
+        <div class="task"><span class="dot"></span>POST /api/logs/workout/complete — close workout session, save duration</div>
+        <div class="task"><span class="dot"></span>Progression detection logic: weight_increase / reps_increase / easy / very_hard / matched</div>
+        <div class="task"><span class="dot"></span>GET /api/logs/history — paginated workout history</div>
+      </div>
+      <div class="col">
+        <div class="col-head">Frontend</div>
+        <div class="task"><span class="dot"></span>/workout/exercise/[index] page — one exercise at a time</div>
+        <div class="task"><span class="dot"></span>GIF display, prescribed values shown</div>
+        <div class="task"><span class="dot"></span>+/- buttons for sets, reps, weight (2.5kg steps)</div>
+        <div class="task"><span class="dot"></span>RPE selector 1–10</div>
+        <div class="task"><span class="dot"></span>Optional notes textarea</div>
+        <div class="task"><span class="dot"></span>"Log & Next" → save + advance to next exercise</div>
+        <div class="task"><span class="dot"></span>Workout complete screen — total time, summary</div>
+        <div class="task"><span class="dot"></span>useWorkout composable — track session state in Pinia</div>
+      </div>
+    </div>
+    <div class="deliverable"><span>Done when:</span> Full workout loop works end-to-end. User starts workout → logs all exercises → sees complete screen → data in DB with progression status.</div>
+  </div>
+</div>
+
+<div class="phase p6">
+  <div class="phase-header" onclick="toggle(this)">
+    <span class="phase-num">Phase 6</span>
+    <span class="phase-title">Progress tracking + personal records</span>
+    <span class="phase-meta">~2–3 days</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="phase-body">
+    <div class="cols">
+      <div class="col">
+        <div class="col-head">Backend</div>
+        <div class="task"><span class="dot"></span>GET /api/progress/prs — personal records per exercise (max weight ever)</div>
+        <div class="task"><span class="dot"></span>GET /api/progress/exercise/:id — weight over time for one exercise</div>
+        <div class="task"><span class="dot"></span>GET /api/progress/volume — weekly total volume (sets × reps × weight)</div>
+        <div class="task"><span class="dot"></span>GET /api/progress/history — list of completed workouts with summary</div>
+        <div class="task"><span class="dot"></span>1RM estimator: Epley formula (weight × (1 + reps/30))</div>
+      </div>
+      <div class="col">
+        <div class="col-head">Frontend</div>
+        <div class="task"><span class="dot"></span>/progress page — charts + PR list</div>
+        <div class="task"><span class="dot"></span>Weight-over-time line chart per exercise (Chart.js or recharts)</div>
+        <div class="task"><span class="dot"></span>PR cards per exercise with 1RM estimate</div>
+        <div class="task"><span class="dot"></span>Weekly volume bar chart</div>
+        <div class="task"><span class="dot"></span>Workout history list (date, duration, exercises done)</div>
+        <div class="task"><span class="dot"></span>Bottom navigation: Home / Workout / Progress / Profile</div>
+      </div>
+    </div>
+    <div class="deliverable"><span>Done when:</span> /progress shows real charts from logged data. PRs update automatically after each workout. MVP is fully functional end-to-end.</div>
+  </div>
+</div>
+
+<script>
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+}
+document.querySelector('.p1 .phase-header').click();
+</script>
