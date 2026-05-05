@@ -5,21 +5,123 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   ResponsiveContainer, LineChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip,
+  XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
 } from "recharts";
 import { getMetrics, logMetric, type BodyMetric } from "@/features/metrics/metrics.api";
-import { Card, CardContent, CardHeader } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { PageLoader, EmptyState } from "@/components/ui/Feedback";
+import { T, FmBtn, FmPageLoader, AppHeader, Icon, FmStyles } from "@/components/fm";
+import { useT } from "@/lib/lang-context";
+import { useSettings } from "@/lib/settings-context";
 
+// ─── Stat card ────────────────────────────────────────────────────────────────
+function StatCard({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: string }) {
+  return (
+    <div style={{
+      flex: 1, background: T.bgCard, borderRadius: 14, padding: "14px 16px",
+      border: `1px solid ${T.border}`, display: "flex", flexDirection: "column", gap: 4, minWidth: 0,
+    }}>
+      {sub && (
+        <span style={{ fontSize: 10, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: T.textMuted }}>
+          {sub}
+        </span>
+      )}
+      <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 26, fontWeight: 900, letterSpacing: "-0.01em", color: accent ?? T.accent, lineHeight: 1 }}>
+        {value}
+      </span>
+      <span style={{ fontSize: 11, color: T.textSub, lineHeight: 1.3 }}>{label}</span>
+    </div>
+  );
+}
+
+// ─── Dark input ───────────────────────────────────────────────────────────────
+function DarkInput({
+  label, type = "text", value, onChange, placeholder, min, max, step,
+}: {
+  label: string; type?: string; value: string;
+  onChange: (v: string) => void; placeholder?: string;
+  min?: number; max?: number; step?: number;
+}) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <label style={{
+        fontFamily: "var(--font-barlow-condensed, sans-serif)",
+        fontSize: 11, fontWeight: 700, letterSpacing: "0.1em",
+        textTransform: "uppercase" as const, color: T.textMuted,
+      }}>
+        {label}
+      </label>
+      <input
+        type={type} value={value} placeholder={placeholder}
+        min={min} max={max} step={step}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          padding: "10px 12px", borderRadius: 10,
+          background: T.bgInput, border: `1.5px solid ${focused ? T.accent : T.border}`,
+          color: T.textPrimary, fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 14,
+          outline: "none", transition: "border-color 0.15s", width: "100%",
+        }}
+      />
+    </div>
+  );
+}
+
+// ─── Custom tooltip ───────────────────────────────────────────────────────────
+function ChartTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{
+      background: T.bgCard, border: `1px solid ${T.border}`,
+      borderRadius: 10, padding: "8px 12px",
+      boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+    }}>
+      <p style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: T.textMuted, marginBottom: 4 }}>{label}</p>
+      {payload.map((p: any) => (
+        <p key={p.dataKey} style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 18, fontWeight: 900, color: T.accentRaw }}>
+          {p.value} {p.unit}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+// ─── History row ──────────────────────────────────────────────────────────────
+function HistoryRow({ m, isLast }: { m: BodyMetric; isLast: boolean }) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 0,
+      padding: "11px 16px",
+      borderBottom: isLast ? "none" : `1px solid ${T.borderLight}`,
+    }}>
+      <span style={{ flex: 1.2, fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 13, color: T.textSub }}>
+        {format(new Date(m.date), "MMM d, yyyy")}
+      </span>
+      <span style={{ flex: 1, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 16, fontWeight: 800, color: m.weight != null ? T.accent : T.textMuted }}>
+        {m.weight != null ? `${m.weight} kg` : "—"}
+      </span>
+      <span style={{ flex: 1, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 16, fontWeight: 800, color: m.bodyFat != null ? T.mobility : T.textMuted }}>
+        {m.bodyFat != null ? `${m.bodyFat}%` : "—"}
+      </span>
+      <span style={{ flex: 1.5, fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 12, color: T.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
+        {m.notes ?? "—"}
+      </span>
+    </div>
+  );
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
 export default function MetricsPage() {
+  const t = useT();
   const qc = useQueryClient();
+  const { open: openSettings } = useSettings();
   const today = format(new Date(), "yyyy-MM-dd");
 
   const [date, setDate] = useState(today);
   const [weight, setWeight] = useState("");
   const [bodyFat, setBodyFat] = useState("");
   const [notes, setNotes] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
 
   const { data: metrics = [], isLoading } = useQuery({
     queryKey: ["metrics"],
@@ -38,13 +140,13 @@ export default function MetricsPage() {
       qc.invalidateQueries({ queryKey: ["metrics"] });
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
       setWeight(""); setBodyFat(""); setNotes("");
+      setFormOpen(false);
       setTimeout(reset, 2000);
     },
   });
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading) return <FmPageLoader />;
 
-  // Chart data — ascending order, only entries with weight
   const chartData = [...metrics]
     .filter((m) => m.weight != null)
     .reverse()
@@ -55,149 +157,175 @@ export default function MetricsPage() {
     }));
 
   const latest = metrics.find((m) => m.weight != null);
+  const avg = chartData.length ? (chartData.reduce((s, d) => s + (d.weight ?? 0), 0) / chartData.length).toFixed(1) : null;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Body metrics</h1>
+    <div style={{ background: T.bg, minHeight: "100%", display: "flex", flexDirection: "column" }}>
+      <FmStyles />
+      <AppHeader
+        title={t.metrics.title}
+        onAccountClick={openSettings}
+        right={
+          <FmBtn size="sm" onClick={() => setFormOpen((v) => !v)}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+            {t.metrics.logMeasurement}
+          </FmBtn>
+        }
+      />
 
-      {/* Summary */}
-      {latest && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {[
-            { label: "Current weight", value: `${latest.weight} kg`, icon: "⚖️" },
-            { label: "Body fat",  value: latest.bodyFat  ? `${latest.bodyFat}%`  : "—", icon: "📊" },
-            { label: "Muscle mass", value: latest.muscleMass ? `${latest.muscleMass} kg` : "—", icon: "💪" },
-          ].map((s) => (
-            <Card key={s.label} className="p-4">
-              <div className="text-2xl mb-1">{s.icon}</div>
-              <div className="text-xl font-bold text-indigo-600">{s.value}</div>
-              <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
-            </Card>
-          ))}
-        </div>
-      )}
+      <div style={{ flex: 1, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
 
-      {/* Weight chart */}
-      {chartData.length > 1 ? (
-        <Card>
-          <CardHeader>
-            <h2 className="font-semibold text-gray-900">Weight history (last 30 entries)</h2>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={chartData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} tickLine={false} />
-                <YAxis
-                  domain={["auto", "auto"]}
-                  tick={{ fontSize: 11 }}
-                  tickLine={false}
-                  axisLine={false}
-                  unit=" kg"
-                />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, fontSize: 12, border: "1px solid #e5e7eb" }}
-                  formatter={(v) => [`${v} kg`, "Weight"]}
-                />
-                <Line
-                  type="monotone" dataKey="weight"
-                  stroke="#6366f1" strokeWidth={2}
-                  dot={{ r: 3, fill: "#6366f1" }}
-                  activeDot={{ r: 5 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      ) : chartData.length === 0 && (
-        <EmptyState title="No weight data yet" body="Log your first measurement below." />
-      )}
+        {/* Stat cards */}
+        {latest ? (
+          <div style={{ display: "flex", gap: 8 }}>
+            <StatCard
+              value={latest.weight != null ? `${latest.weight}` : "—"}
+              label={t.metrics.currentWeight}
+              sub={t.metrics.weightCol}
+              accent={T.accentRaw}
+            />
+            <StatCard
+              value={latest.bodyFat != null ? `${latest.bodyFat}%` : "—"}
+              label={t.metrics.bodyFat}
+              sub="BF%"
+              accent={T.mobility}
+            />
+            <StatCard
+              value={latest.muscleMass != null ? `${latest.muscleMass}` : "—"}
+              label={t.metrics.muscleMass}
+              sub="kg"
+              accent={T.flexibility}
+            />
+          </div>
+        ) : (
+          <div style={{
+            background: T.bgCard, borderRadius: 14, padding: "20px 20px",
+            border: `1px solid ${T.border}`, textAlign: "center",
+          }}>
+            <p style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 16, fontWeight: 800, textTransform: "uppercase" as const, color: T.textSub, marginBottom: 4 }}>
+              {t.metrics.noWeightData}
+            </p>
+            <p style={{ fontSize: 13, color: T.textMuted, fontFamily: "var(--font-dm-sans, sans-serif)" }}>
+              {t.metrics.noWeightDataBody}
+            </p>
+          </div>
+        )}
 
-      {/* Log form */}
-      <Card>
-        <CardHeader>
-          <h2 className="font-semibold text-gray-900">Log measurement</h2>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">Date</label>
-              <input
-                type="date"
-                value={date}
-                max={today}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-              />
+        {/* Chart */}
+        {chartData.length > 1 && (
+          <div style={{ background: T.bgCard, borderRadius: 16, border: `1px solid ${T.border}`, overflow: "hidden" }}>
+            <div style={{ padding: "14px 16px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: T.textMuted }}>
+                {t.metrics.weightHistory}
+              </span>
+              {avg && (
+                <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 13, fontWeight: 700, color: T.textSub }}>
+                  avg <span style={{ color: T.accentRaw }}>{avg} kg</span>
+                </span>
+              )}
             </div>
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">Weight (kg)</label>
-              <input
-                type="number" min={0} step={0.1} placeholder="e.g. 75.5"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">Body fat (%)</label>
-              <input
-                type="number" min={0} max={100} step={0.1} placeholder="optional"
-                value={bodyFat}
-                onChange={(e) => setBodyFat(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">Notes</label>
-              <input
-                type="text" placeholder="optional"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-              />
+            <div style={{ padding: "10px 0 6px" }}>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={chartData} margin={{ top: 8, right: 20, bottom: 0, left: -10 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={T.borderLight} vertical={false} />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fill: T.textMuted, fontSize: 10, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontWeight: 700 }}
+                    tickLine={false} axisLine={false}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis
+                    domain={["auto", "auto"]}
+                    tick={{ fill: T.textMuted, fontSize: 10, fontFamily: "var(--font-barlow-condensed, sans-serif)" }}
+                    tickLine={false} axisLine={false} unit=" kg"
+                  />
+                  <Tooltip content={<ChartTooltip />} />
+                  {avg && (
+                    <ReferenceLine y={Number(avg)} stroke={T.accentMid} strokeDasharray="4 4" strokeWidth={1} />
+                  )}
+                  <Line
+                    type="monotone" dataKey="weight" unit="kg"
+                    stroke={T.accentRaw} strokeWidth={2}
+                    dot={{ r: 3, fill: T.accentRaw, strokeWidth: 0 }}
+                    activeDot={{ r: 5, fill: T.accentRaw, strokeWidth: 2, stroke: T.bg }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
+        )}
 
-          <div className="flex items-center gap-3">
-            <Button loading={isPending} disabled={!weight && !bodyFat} onClick={() => log()}>
-              Save measurement
-            </Button>
-            {isSuccess && <span className="text-sm text-emerald-600">✓ Saved!</span>}
+        {/* Log form (collapsible) */}
+        {formOpen && (
+          <div style={{
+            background: T.bgCard, borderRadius: 16,
+            border: `1px solid ${T.border}`,
+            overflow: "hidden",
+            animation: "fm-fadeUp 0.2s ease",
+          }}>
+            <div style={{ padding: "14px 16px", borderBottom: `1px solid ${T.border}` }}>
+              <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 15, fontWeight: 800, textTransform: "uppercase" as const, letterSpacing: "0.06em", color: T.textPrimary }}>
+                {t.metrics.logMeasurement}
+              </span>
+            </div>
+            <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <DarkInput label={t.metrics.date} type="date" value={date} onChange={setDate} />
+                <DarkInput label={t.metrics.weight} type="number" value={weight} onChange={setWeight} placeholder="e.g. 75.5" min={0} step={0.1} />
+                <DarkInput label={t.metrics.bodyFatPct} type="number" value={bodyFat} onChange={setBodyFat} placeholder={t.metrics.optional} min={0} max={100} step={0.1} />
+                <DarkInput label={t.metrics.notes} value={notes} onChange={setNotes} placeholder={t.metrics.optional} />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <FmBtn
+                  loading={isPending}
+                  disabled={!weight && !bodyFat}
+                  onClick={() => log()}
+                  style={{ flex: 1 }}
+                >
+                  {t.metrics.save}
+                </FmBtn>
+                <FmBtn variant="ghost" onClick={() => setFormOpen(false)}>
+                  ✕
+                </FmBtn>
+                {isSuccess && (
+                  <span style={{ fontSize: 13, color: T.success, fontFamily: "var(--font-dm-sans, sans-serif)", fontWeight: 600 }}>
+                    {t.metrics.saved}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        )}
 
-      {/* History table */}
-      {metrics.length > 0 && (
-        <Card>
-          <CardHeader>
-            <h2 className="font-semibold text-gray-900">History</h2>
-          </CardHeader>
-          <CardContent className="pt-0 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs text-gray-400 border-b">
-                  <th className="pb-2 font-medium">Date</th>
-                  <th className="pb-2 font-medium">Weight</th>
-                  <th className="pb-2 font-medium">Body fat</th>
-                  <th className="pb-2 font-medium">Notes</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {metrics.map((m: BodyMetric) => (
-                  <tr key={m.id} className="text-gray-700">
-                    <td className="py-2 pr-4">{format(new Date(m.date), "MMM d, yyyy")}</td>
-                    <td className="py-2 pr-4">{m.weight != null ? `${m.weight} kg` : "—"}</td>
-                    <td className="py-2 pr-4">{m.bodyFat != null ? `${m.bodyFat}%` : "—"}</td>
-                    <td className="py-2 text-gray-400">{m.notes ?? "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
-      )}
+        {/* History table */}
+        {metrics.length > 0 && (
+          <div style={{ background: T.bgCard, borderRadius: 16, border: `1px solid ${T.border}`, overflow: "hidden" }}>
+            {/* thead */}
+            <div style={{
+              display: "flex", padding: "10px 16px",
+              borderBottom: `1px solid ${T.border}`,
+            }}>
+              {[
+                { label: t.metrics.date, flex: 1.2 },
+                { label: t.metrics.weightCol, flex: 1 },
+                { label: t.metrics.bodyFatCol, flex: 1 },
+                { label: t.metrics.notesCol, flex: 1.5 },
+              ].map((col) => (
+                <span key={col.label} style={{
+                  flex: col.flex, fontFamily: "var(--font-barlow-condensed, sans-serif)",
+                  fontSize: 10, fontWeight: 700, letterSpacing: "0.1em",
+                  textTransform: "uppercase" as const, color: T.textMuted,
+                }}>
+                  {col.label}
+                </span>
+              ))}
+            </div>
+            {metrics.map((m: BodyMetric, i) => (
+              <HistoryRow key={m.id} m={m} isLast={i === metrics.length - 1} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitMe — Dashboard & Workouts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" src="android-frame.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a10; }
+    body { display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input::placeholder { color: #3a3a4c; }
+    * { -webkit-tap-highlight-color: transparent; }
+    ::-webkit-scrollbar { width: 0; height: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes barGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  </style>
+</head>
+<body>
+<div id="root" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ─── Tokens ────────────────────────────────────────────────────────────────────
+const T = {
+  bg:          '#0d0d12',
+  bgCard:      '#16161f',
+  bgInput:     '#1e1e2a',
+  bgCardAlt:   '#1a1a26',
+  border:      '#2a2a38',
+  borderLight: '#222230',
+  accent:      'oklch(0.72 0.18 35)',
+  accentRaw:   '#e8854a',
+  accentDim:   'oklch(0.72 0.18 35 / 0.12)',
+  accentMid:   'oklch(0.72 0.18 35 / 0.3)',
+  accentGlow:  'oklch(0.72 0.18 35 / 0.08)',
+  strength:    'oklch(0.68 0.16 290)',  // purple
+  cardio:      'oklch(0.65 0.18 20)',   // red-orange
+  flexibility: 'oklch(0.70 0.14 150)', // green
+  mobility:    'oklch(0.68 0.14 220)',  // blue
+  textPrimary: '#f0ede8',
+  textSub:     '#8a8898',
+  textMuted:   '#4a4a5c',
+  danger:      '#ef4444',
+  success:     '#22c55e',
+};
+
+const CAT_COLOR = {
+  STRENGTH:    T.strength,
+  CARDIO:      T.cardio,
+  FLEXIBILITY: T.flexibility,
+  MOBILITY:    T.mobility,
+};
+
+// ─── Mock Data ─────────────────────────────────────────────────────────────────
+const MOCK_STATS = {
+  workoutsThisWeek: 3,
+  totalWorkouts: 47,
+  totalSets: 892,
+  currentWeight: 78.5,
+  streak: 12,
+  weeklyActivity: [4, 0, 3, 5, 2, 0, 3], // Mon–Sun sets per day
+  recentWorkouts: [
+    {
+      id: 'w1', startedAt: new Date(Date.now() - 86400000).toISOString(),
+      finishedAt: new Date(Date.now() - 82800000).toISOString(),
+      sets: [
+        { id: 's1', setNumber: 1, reps: 8, weight: 100, exercise: { id: 'e1', name: 'Bench Press', category: 'STRENGTH' } },
+        { id: 's2', setNumber: 2, reps: 8, weight: 100, exercise: { id: 'e1', name: 'Bench Press', category: 'STRENGTH' } },
+        { id: 's3', setNumber: 3, reps: 6, weight: 105, exercise: { id: 'e1', name: 'Bench Press', category: 'STRENGTH' } },
+        { id: 's4', setNumber: 1, reps: 12, weight: 60, exercise: { id: 'e2', name: 'Squat', category: 'STRENGTH' } },
+        { id: 's5', setNumber: 2, reps: 10, weight: 65, exercise: { id: 'e2', name: 'Squat', category: 'STRENGTH' } },
+      ]
+    },
+    {
+      id: 'w2', startedAt: new Date(Date.now() - 259200000).toISOString(),
+      finishedAt: new Date(Date.now() - 255600000).toISOString(),
+      sets: [
+        { id: 's6', setNumber: 1, reps: 10, weight: null, exercise: { id: 'e3', name: 'Pull-ups', category: 'STRENGTH' } },
+        { id: 's7', setNumber: 1, duration: 1800, weight: null, exercise: { id: 'e4', name: '5K Run', category: 'CARDIO' } },
+      ]
+    },
+    {
+      id: 'w3', startedAt: new Date(Date.now() - 432000000).toISOString(),
+      finishedAt: new Date(Date.now() - 428400000).toISOString(),
+      sets: [
+        { id: 's8', setNumber: 1, reps: 15, weight: 20, exercise: { id: 'e5', name: 'Deadlift', category: 'STRENGTH' } },
+        { id: 's9', setNumber: 1, reps: null, weight: null, exercise: { id: 'e6', name: 'Hip Flexor Stretch', category: 'FLEXIBILITY' } },
+      ]
+    },
+  ],
+};
+
+const MOCK_EXERCISES = [
+  { id: 'e1', name: 'Bench Press',        category: 'STRENGTH',    muscleGroups: ['Chest', 'Triceps'] },
+  { id: 'e2', name: 'Squat',              category: 'STRENGTH',    muscleGroups: ['Quads', 'Glutes'] },
+  { id: 'e3', name: 'Pull-ups',           category: 'STRENGTH',    muscleGroups: ['Back', 'Biceps'] },
+  { id: 'e4', name: 'Deadlift',           category: 'STRENGTH',    muscleGroups: ['Back', 'Hamstrings'] },
+  { id: 'e5', name: 'Overhead Press',     category: 'STRENGTH',    muscleGroups: ['Shoulders', 'Triceps'] },
+  { id: 'e6', name: '5K Run',             category: 'CARDIO',      muscleGroups: ['Full Body'] },
+  { id: 'e7', name: 'Rowing Machine',     category: 'CARDIO',      muscleGroups: ['Full Body'] },
+  { id: 'e8', name: 'Hip Flexor Stretch', category: 'FLEXIBILITY', muscleGroups: ['Hips'] },
+  { id: 'e9', name: 'Shoulder Mob.',      category: 'MOBILITY',    muscleGroups: ['Shoulders'] },
+];
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+function timeAgo(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const h = Math.floor(diff / 3600000);
+  const d = Math.floor(diff / 86400000);
+  if (h < 1) return 'just now';
+  if (h < 24) return `${h}h ago`;
+  if (d === 1) return 'yesterday';
+  return `${d}d ago`;
+}
+function duration(start, end) {
+  if (!end) return null;
+  return Math.round((new Date(end) - new Date(start)) / 60000);
+}
+function fmtDate(iso) {
+  return new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+// ─── Micro icons (SVG) ─────────────────────────────────────────────────────────
+const Icon = {
+  Home: ({s=22,c='currentColor'}) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  Dumbbell: ({s=22,c='currentColor'}) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 4v16M18 4v16M6 9h12M6 15h12M4 6h2M4 18h2M18 6h2M18 18h2"/></svg>,
+  Search: ({s=22,c='currentColor'}) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+  Chart: ({s=22,c='currentColor'}) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
+  Plus: ({s=20,c='currentColor'}) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  Flame: ({s=16,c='currentColor'}) => <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M12 2c0 0-5 5-5 11a5 5 0 0010 0c0-3.5-2-6-2-6s-1 3-3 3c0 0 1-5 0-8z" opacity=".8"/><path d="M12 14c-1.1 0-2-.9-2-2 0-1.5 2-4 2-4s2 2.5 2 4c0 1.1-.9 2-2 2z"/></svg>,
+  Check: ({s=14,c='currentColor'}) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  ChevRight: ({s=16,c='currentColor'}) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
+  ChevDown: ({s=14,c='currentColor'}) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
+  Timer: ({s=14,c='currentColor'}) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>,
+  Trash: ({s=16,c='currentColor'}) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>,
+  Bolt: ({s=18,c='currentColor'}) => <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M13 2L4.09 12.69A1 1 0 005 14h6v8l8.91-10.69A1 1 0 0019 10h-6V2z"/></svg>,
+};
+
+// ─── Shared primitives ─────────────────────────────────────────────────────────
+function Badge({ cat, label }) {
+  const color = CAT_COLOR[cat] || T.textSub;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center',
+      padding: '2px 8px', borderRadius: 100,
+      fontSize: 10, fontWeight: 600, fontFamily: "'Barlow Condensed'",
+      letterSpacing: '0.06em', textTransform: 'uppercase',
+      background: color + '1a', color,
+    }}>{label || cat.charAt(0) + cat.slice(1).toLowerCase()}</span>
+  );
+}
+
+function Pill({ label, active, onClick, color }) {
+  return (
+    <button onClick={onClick} style={{
+      padding: '5px 14px', borderRadius: 100,
+      border: `1.5px solid ${active ? (color || T.accent) : T.border}`,
+      background: active ? (color ? color + '1a' : T.accentDim) : 'transparent',
+      color: active ? (color || T.accent) : T.textSub,
+      fontSize: 11, fontFamily: "'Barlow Condensed'", fontWeight: 700,
+      letterSpacing: '0.07em', textTransform: 'uppercase',
+      cursor: 'pointer', whiteSpace: 'nowrap',
+      transition: 'all 0.15s',
+    }}>{label}</button>
+  );
+}
+
+function Btn({ children, onClick, variant='primary', size='md', disabled, loading, style: extStyle }) {
+  const pad = size === 'sm' ? '7px 14px' : size === 'lg' ? '15px 24px' : '11px 20px';
+  const fs  = size === 'sm' ? 13 : size === 'lg' ? 17 : 15;
+  return (
+    <button onClick={onClick} disabled={disabled || loading} style={{
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+      padding: pad, borderRadius: 12,
+      border: variant === 'ghost' ? `1.5px solid ${T.border}` : variant === 'danger' ? 'none' : 'none',
+      background: variant === 'primary' ? T.accent : variant === 'danger' ? T.danger : variant === 'ghost' ? 'transparent' : T.bgInput,
+      color: variant === 'primary' ? '#0d0d12' : T.textPrimary,
+      fontFamily: "'Barlow Condensed'", fontSize: fs, fontWeight: 700,
+      letterSpacing: '0.05em', textTransform: 'uppercase',
+      cursor: disabled ? 'not-allowed' : 'pointer',
+      opacity: disabled ? 0.45 : 1,
+      transition: 'opacity 0.15s, transform 0.1s',
+      ...extStyle,
+    }}
+    onMouseDown={e => { if(!disabled) e.currentTarget.style.transform='scale(0.97)'; }}
+    onMouseUp={e => { e.currentTarget.style.transform='scale(1)'; }}
+    >
+      {loading ? <div style={{width:14,height:14,border:'2px solid rgba(0,0,0,0.2)',borderTopColor:'#0d0d12',borderRadius:'50%',animation:'spin 0.7s linear infinite'}}/> : children}
+    </button>
+  );
+}
+
+// ─── Bottom Tab Bar ────────────────────────────────────────────────────────────
+const TABS = [
+  { id: 'dashboard', label: 'Home',      Icon: Icon.Home },
+  { id: 'workouts',  label: 'Workouts',  Icon: Icon.Dumbbell },
+  { id: 'exercises', label: 'Exercises', Icon: Icon.Search },
+  { id: 'metrics',   label: 'Metrics',   Icon: Icon.Chart },
+];
+
+function TabBar({ active, onTab }) {
+  return (
+    <div style={{
+      height: 64, background: T.bgCard,
+      borderTop: `1px solid ${T.border}`,
+      display: 'flex', alignItems: 'stretch',
+      flexShrink: 0,
+    }}>
+      {TABS.map(t => {
+        const isActive = t.id === active;
+        return (
+          <button key={t.id} onClick={() => onTab(t.id)} style={{
+            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', gap: 3,
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: isActive ? T.accent : T.textMuted,
+            transition: 'color 0.15s',
+            position: 'relative',
+          }}>
+            {isActive && (
+              <div style={{
+                position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+                width: 32, height: 2, borderRadius: 2, background: T.accent,
+              }} />
+            )}
+            <t.Icon s={20} c={isActive ? T.accentRaw : T.textMuted} />
+            <span style={{ fontSize: 10, fontFamily: "'Barlow Condensed'", fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              {t.label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── App Header ────────────────────────────────────────────────────────────────
+function AppHeader({ title, right }) {
+  return (
+    <div style={{
+      padding: '14px 20px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      background: T.bg, borderBottom: `1px solid ${T.borderLight}`, flexShrink: 0,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ width: 28, height: 28, borderRadius: 8, background: T.accent, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon.Bolt s={14} c="#0d0d12" />
+        </div>
+        <span style={{ fontFamily: "'Barlow Condensed'", fontSize: 20, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: T.textPrimary }}>
+          {title}
+        </span>
+      </div>
+      {right}
+    </div>
+  );
+}
+
+// ─── Stat Card ─────────────────────────────────────────────────────────────────
+function StatCard({ value, label, sub, accent, wide }) {
+  return (
+    <div style={{
+      background: T.bgCard, borderRadius: 14, padding: '14px 16px',
+      border: `1px solid ${T.border}`,
+      flex: wide ? 2 : 1, minWidth: 0,
+      display: 'flex', flexDirection: 'column', gap: 4,
+    }}>
+      {sub && (
+        <span style={{ fontSize: 10, fontFamily: "'Barlow Condensed'", fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.textMuted }}>
+          {sub}
+        </span>
+      )}
+      <span style={{ fontFamily: "'Barlow Condensed'", fontSize: 28, fontWeight: 900, letterSpacing: '-0.01em', color: accent || T.accent, lineHeight: 1 }}>
+        {value}
+      </span>
+      <span style={{ fontSize: 11, fontFamily: "'DM Sans'", color: T.textSub, lineHeight: 1.3 }}>
+        {label}
+      </span>
+    </div>
+  );
+}
+
+// ─── Weekly Bar Chart ──────────────────────────────────────────────────────────
+function WeeklyChart({ data }) {
+  const days = ['M','T','W','T','F','S','S'];
+  const max = Math.max(...data, 1);
+  const today = new Date().getDay(); // 0=Sun
+  const todayIdx = today === 0 ? 6 : today - 1;
+
+  return (
+    <div style={{ background: T.bgCard, borderRadius: 14, padding: '16px 16px 12px', border: `1px solid ${T.border}` }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span style={{ fontFamily: "'Barlow Condensed'", fontSize: 13, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: T.textSub }}>
+          This Week
+        </span>
+        <span style={{ fontFamily: "'Barlow Condensed'", fontSize: 13, fontWeight: 700, color: T.accent }}>
+          {data.reduce((a,b)=>a+b,0)} sets
+        </span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 60 }}>
+        {data.map((v, i) => {
+          const isToday = i === todayIdx;
+          const h = max > 0 ? Math.max((v / max) * 52, v > 0 ? 6 : 0) : 0;
+          return (
+            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+              <div style={{
+                width: '100%', height: 52, display: 'flex', alignItems: 'flex-end', borderRadius: 6, overflow: 'hidden',
+              }}>
+                <div style={{
+                  width: '100%', height: h || 0,
+                  borderRadius: 4,
+                  background: isToday ? T.accent : v > 0 ? T.accentMid : T.bgInput,
+                  transformOrigin: 'bottom',
+                  animation: v > 0 ? 'barGrow 0.4s ease both' : 'none',
+                  animationDelay: `${i * 0.06}s`,
+                }} />
+              </div>
+              <span style={{
+                fontSize: 10, fontFamily: "'Barlow Condensed'", fontWeight: 700,
+                color: isToday ? T.accent : T.textMuted, letterSpacing: '0.04em',
+              }}>{days[i]}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Recent Workout Row ────────────────────────────────────────────────────────
+function WorkoutRow({ w, onTap }) {
+  const uniqueEx = [...new Map(w.sets.map(s => [s.exercise.id, s.exercise])).values()];
+  const dur = duration(w.startedAt, w.finishedAt);
+  const cats = [...new Set(uniqueEx.map(e => e.category))];
+
+  return (
+    <div onClick={onTap} style={{
+      display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0',
+      borderBottom: `1px solid ${T.borderLight}`, cursor: 'pointer',
+    }}>
+      {/* Color dot */}
+      <div style={{
+        width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+        background: (CAT_COLOR[cats[0]] || T.accent) + '18',
+        border: `1.5px solid ${(CAT_COLOR[cats[0]] || T.accent) + '30'}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Icon.Dumbbell s={16} c={CAT_COLOR[cats[0]] || T.accent} />
+      </div>
+      {/* Info */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+          <span style={{ fontFamily: "'DM Sans'", fontSize: 13, fontWeight: 600, color: T.textPrimary }}>
+            {fmtDate(w.startedAt)}
+          </span>
+          {dur && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: T.textMuted, fontFamily: "'DM Sans'" }}>
+              <Icon.Timer s={11} c={T.textMuted} />{dur}m
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          {uniqueEx.slice(0,3).map(ex => (
+            <Badge key={ex.id} cat={ex.category} label={ex.name.length > 14 ? ex.name.slice(0,13)+'…' : ex.name} />
+          ))}
+          {uniqueEx.length > 3 && <span style={{ fontSize: 10, color: T.textMuted, alignSelf: 'center' }}>+{uniqueEx.length-3}</span>}
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3, flexShrink: 0 }}>
+        <span style={{ fontFamily: "'Barlow Condensed'", fontSize: 18, fontWeight: 800, color: T.textPrimary }}>{w.sets.length}</span>
+        <span style={{ fontSize: 10, color: T.textMuted, fontFamily: "'DM Sans'" }}>sets</span>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SCREEN: Dashboard
+// ═══════════════════════════════════════════════════════════════════════════════
+function DashboardScreen({ onTab, compact }) {
+  const s = MOCK_STATS;
+  const pad = compact ? '0 16px' : '0 20px';
+
+  return (
+    <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div style={{ padding: compact ? '14px 16px 10px' : '18px 20px 12px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <p style={{ fontFamily: "'DM Sans'", fontSize: 12, color: T.textSub, marginBottom: 2 }}>
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            </p>
+            <h1 style={{ fontFamily: "'Barlow Condensed'", fontSize: compact ? 28 : 34, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.01em', color: T.textPrimary, lineHeight: 1 }}>
+              Hey, Alex 👋
+            </h1>
+          </div>
+          {/* Avatar */}
+          <div style={{
+            width: compact ? 38 : 44, height: compact ? 38 : 44, borderRadius: '50%',
+            background: `linear-gradient(135deg, ${T.accent} 0%, oklch(0.62 0.22 50) 100%)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: `0 0 0 2px ${T.bg}, 0 0 0 4px ${T.accentMid}`,
+          }}>
+            <span style={{ fontFamily: "'Barlow Condensed'", fontSize: compact ? 15 : 17, fontWeight: 800, color: '#0d0d12' }}>AJ</span>
+          </div>
+        </div>
+
+        {/* Streak banner */}
+        <div style={{
+          marginTop: compact ? 10 : 14, padding: '10px 14px',
+          background: T.accentDim, borderRadius: 12, border: `1px solid ${T.accentMid}`,
+          display: 'flex', alignItems: 'center', gap: 10,
+        }}>
+          <Icon.Flame s={18} c={T.accentRaw} />
+          <span style={{ fontFamily: "'Barlow Condensed'", fontSize: 14, fontWeight: 700, color: T.accent, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            {s.streak}-Day Streak
+          </span>
+          <span style={{ fontFamily: "'DM Sans'", fontSize: 12, color: T.textSub, marginLeft: 'auto' }}>
+            Keep it up!
+          </span>
+        </div>
+      </div>
+
+      {/* Scrollable content */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: compact ? '0 16px 16px' : '0 20px 20px', display: 'flex', flexDirection: 'column', gap: compact ? 12 : 16 }}>
+
+        {/* Stat cards row */}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <StatCard value={s.workoutsThisWeek} label="This week" sub="Workouts" />
+          <StatCard value={s.streak} label="Day streak" sub="Current" accent={T.accentRaw} />
+          <StatCard value={`${s.currentWeight}`} label="kg · weight" sub="Current" accent={T.mobility} />
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <StatCard value={s.totalWorkouts} label="Total workouts" sub="All time" accent={T.strength} wide />
+          <StatCard value={s.totalSets} label="Total sets" sub="All time" accent={T.flexibility} wide />
+        </div>
+
+        {/* Weekly chart */}
+        <WeeklyChart data={s.weeklyActivity} />
+
+        {/* Recent workouts */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span style={{ fontFamily: "'Barlow Condensed'", fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: T.textSub }}>
+              Recent
+            </span>
+            <button onClick={() => onTab('workouts')} style={{ background: 'none', border: 'none', color: T.accent, fontFamily: "'DM Sans'", fontSize: 12, fontWeight: 500, cursor: 'pointer' }}>
+              See all
+            </button>
+          </div>
+          <div style={{ background: T.bgCard, borderRadius: 14, padding: '0 14px', border: `1px solid ${T.border}` }}>
+            {s.recentWorkouts.map((w, i) => (
+              <WorkoutRow key={w.id} w={w} onTap={() => onTab('workouts')} />
+            ))}
+          </div>
+        </div>
+
+        {/* Quick action */}
+        <Btn onClick={() => onTab('workouts')} size="lg" style={{ width: '100%', borderRadius: 14 }}>
+          <Icon.Plus s={18} c="#0d0d12" /> Start Workout
+        </Btn>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SCREEN: Workouts
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── Set Logger ─────────────────────────────────────────────────────────────────
+function SetLogger({ session, onFinish, compact }) {
+  const [exerciseId, setExerciseId] = useState('');
+  const [rows, setRows] = useState([{ setNumber: 1, reps: '', weight: '' }]);
+  const [loggedSets, setLoggedSets] = useState([]);
+  const [logging, setLogging] = useState(false);
+  const [finishing, setFinishing] = useState(false);
+  const [exSearch, setExSearch] = useState('');
+  const [showExPicker, setShowExPicker] = useState(false);
+
+  const selectedEx = MOCK_EXERCISES.find(e => e.id === exerciseId);
+  const filteredEx = MOCK_EXERCISES.filter(e =>
+    e.name.toLowerCase().includes(exSearch.toLowerCase())
+  );
+
+  const canLog = exerciseId && rows.some(r => r.reps || r.weight);
+
+  // elapsed timer
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setElapsed(s => s+1), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const mm = String(Math.floor(elapsed/60)).padStart(2,'0');
+  const ss = String(elapsed%60).padStart(2,'0');
+
+  function handleLog() {
+    if (!canLog) return;
+    setLogging(true);
+    setTimeout(() => {
+      const newSets = rows.filter(r => r.reps || r.weight).map(r => ({
+        id: Math.random().toString(36).slice(2),
+        setNumber: r.setNumber, reps: r.reps ? +r.reps : null, weight: r.weight ? +r.weight : null,
+        exercise: selectedEx,
+      }));
+      setLoggedSets(s => [...s, ...newSets]);
+      const existingForEx = loggedSets.filter(s => s.exercise.id === exerciseId).length + newSets.length;
+      setRows([{ setNumber: existingForEx + 1, reps: '', weight: '' }]);
+      setLogging(false);
+    }, 600);
+  }
+
+  function handleFinish() {
+    setFinishing(true);
+    setTimeout(() => { setFinishing(false); onFinish(loggedSets); }, 800);
+  }
+
+  function addRow() {
+    const existing = loggedSets.filter(s => s.exercise.id === exerciseId).length;
+    setRows(r => [...r, { setNumber: existing + r.length + 1, reps: '', weight: '' }]);
+  }
+
+  const rowPy = compact ? 8 : 10;
+
+  return (
+    <div style={{ background: T.bgCard, borderRadius: 16, border: `1px solid ${T.border}`, overflow: 'hidden', flexShrink: 0 }}>
+      {/* Session header */}
+      <div style={{ padding: compact ? '12px 16px' : '14px 18px', borderBottom: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: T.success, animation: 'pulse 2s infinite' }} />
+            <span style={{ fontFamily: "'Barlow Condensed'", fontSize: 13, fontWeight: 700, color: T.success, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Active
+            </span>
+          </div>
+          <span style={{ fontFamily: "'Barlow Condensed'", fontSize: compact ? 22 : 26, fontWeight: 900, color: T.textPrimary, letterSpacing: '-0.01em' }}>
+            {mm}:{ss}
+          </span>
+        </div>
+        <Btn variant="danger" size="sm" loading={finishing} onClick={handleFinish}>
+          Finish
+        </Btn>
+      </div>
+
+      <div style={{ padding: compact ? '12px 16px' : '14px 18px', display: 'flex', flexDirection: 'column', gap: compact ? 12 : 14 }}>
+        {/* Exercise picker */}
+        <div style={{ position: 'relative' }}>
+          <button onClick={() => setShowExPicker(v => !v)} style={{
+            width: '100%', padding: `${rowPy}px 14px`, borderRadius: 10,
+            background: T.bgInput, border: `1.5px solid ${showExPicker ? T.accent : T.border}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            cursor: 'pointer', transition: 'border-color 0.15s',
+          }}>
+            <span style={{ fontFamily: "'DM Sans'", fontSize: compact ? 13 : 14, color: selectedEx ? T.textPrimary : T.textMuted }}>
+              {selectedEx ? selectedEx.name : 'Select exercise…'}
+            </span>
+            <Icon.ChevDown s={14} c={T.textSub} />
+          </button>
+
+          {showExPicker && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10,
+              background: T.bgCard, border: `1.5px solid ${T.border}`, borderRadius: 10,
+              marginTop: 4, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+            }}>
+              <div style={{ padding: '8px 10px', borderBottom: `1px solid ${T.border}` }}>
+                <input
+                  value={exSearch} onChange={e => setExSearch(e.target.value)}
+                  placeholder="Search…"
+                  autoFocus
+                  style={{ width: '100%', background: T.bgInput, border: `1.5px solid ${T.border}`, borderRadius: 8, padding: '7px 10px', color: T.textPrimary, fontFamily: "'DM Sans'", fontSize: 13, outline: 'none' }}
+                />
+              </div>
+              <div style={{ maxHeight: 160, overflowY: 'auto' }}>
+                {filteredEx.map(ex => (
+                  <button key={ex.id} onClick={() => { setExerciseId(ex.id); setShowExPicker(false); setExSearch(''); const existing = loggedSets.filter(s=>s.exercise.id===ex.id).length; setRows([{setNumber:existing+1,reps:'',weight:''}]); }} style={{
+                    width: '100%', padding: '10px 14px', background: ex.id === exerciseId ? T.accentDim : 'transparent',
+                    border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    cursor: 'pointer', borderBottom: `1px solid ${T.borderLight}`,
+                  }}>
+                    <span style={{ fontFamily: "'DM Sans'", fontSize: 13, color: ex.id === exerciseId ? T.accent : T.textPrimary }}>{ex.name}</span>
+                    <Badge cat={ex.category} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Set rows */}
+        {exerciseId && (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr', gap: 6, marginBottom: 6 }}>
+              <span style={{ textAlign: 'center', fontSize: 10, color: T.textMuted, fontFamily: "'Barlow Condensed'", fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingTop: 4 }}>Set</span>
+              <span style={{ textAlign: 'center', fontSize: 10, color: T.textMuted, fontFamily: "'Barlow Condensed'", fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Reps</span>
+              <span style={{ textAlign: 'center', fontSize: 10, color: T.textMuted, fontFamily: "'Barlow Condensed'", fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>kg</span>
+            </div>
+            {rows.map((row, i) => (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr', gap: 6, marginBottom: 6 }}>
+                <div style={{ height: compact ? 36 : 42, background: T.bgInput, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontFamily: "'Barlow Condensed'", fontSize: 15, fontWeight: 800, color: T.textSub }}>{row.setNumber}</span>
+                </div>
+                <input type="number" min={0} placeholder="—" value={row.reps}
+                  onChange={e => setRows(r => r.map((ro,idx) => idx===i ? {...ro,reps:e.target.value} : ro))}
+                  style={{ height: compact ? 36 : 42, background: T.bgInput, border: `1.5px solid ${T.border}`, borderRadius: 8, textAlign: 'center', color: T.textPrimary, fontFamily: "'Barlow Condensed'", fontSize: 17, fontWeight: 700, outline: 'none' }}
+                />
+                <input type="number" min={0} step={0.5} placeholder="—" value={row.weight}
+                  onChange={e => setRows(r => r.map((ro,idx) => idx===i ? {...ro,weight:e.target.value} : ro))}
+                  style={{ height: compact ? 36 : 42, background: T.bgInput, border: `1.5px solid ${T.border}`, borderRadius: 8, textAlign: 'center', color: T.textPrimary, fontFamily: "'Barlow Condensed'", fontSize: 17, fontWeight: 700, outline: 'none' }}
+                />
+              </div>
+            ))}
+            <button onClick={addRow} style={{ background: 'none', border: 'none', color: T.accent, fontFamily: "'DM Sans'", fontSize: 12, fontWeight: 500, cursor: 'pointer', padding: '2px 0' }}>
+              + Add set
+            </button>
+          </div>
+        )}
+
+        <Btn onClick={handleLog} disabled={!canLog} loading={logging} style={{ width: '100%' }}>
+          Log Sets
+        </Btn>
+
+        {/* Logged this session */}
+        {loggedSets.length > 0 && (
+          <div style={{ borderTop: `1px solid ${T.border}`, paddingTop: compact ? 10 : 12 }}>
+            <span style={{ fontSize: 10, fontFamily: "'Barlow Condensed'", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: T.textMuted }}>
+              Logged · {loggedSets.length} set{loggedSets.length !== 1 ? 's' : ''}
+            </span>
+            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {loggedSets.map(s => (
+                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: T.textSub, fontFamily: "'DM Sans'" }}>
+                  <Badge cat={s.exercise.category} label={s.exercise.name} />
+                  <span>#{s.setNumber}</span>
+                  {s.reps   != null && <span>{s.reps} reps</span>}
+                  {s.weight != null && <span>· {s.weight} kg</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── History Card ───────────────────────────────────────────────────────────────
+function HistoryCard({ w, compact }) {
+  const [open, setOpen] = useState(false);
+  const dur = duration(w.startedAt, w.finishedAt);
+  const uniqueEx = [...new Map(w.sets.map(s => [s.exercise.id, s.exercise])).values()];
+  const cats = [...new Set(uniqueEx.map(e => e.category))];
+
+  return (
+    <div style={{ background: T.bgCard, borderRadius: 14, border: `1px solid ${T.border}`, overflow: 'hidden' }}>
+      <div onClick={() => setOpen(o => !o)} style={{ padding: compact ? '12px 14px' : '14px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: 11, flexShrink: 0,
+          background: (CAT_COLOR[cats[0]] || T.accent) + '15',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <Icon.Dumbbell s={17} c={CAT_COLOR[cats[0]] || T.accent} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+            <span style={{ fontFamily: "'DM Sans'", fontSize: compact ? 13 : 14, fontWeight: 600, color: T.textPrimary }}>
+              {fmtDate(w.startedAt)}
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: T.textMuted }}>
+              <Icon.Timer s={11} c={T.textMuted} />{dur}m
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+            {uniqueEx.slice(0,2).map(ex => <Badge key={ex.id} cat={ex.category} label={ex.name.slice(0,12)} />)}
+            {uniqueEx.length > 2 && <span style={{ fontSize: 10, color: T.textMuted, alignSelf: 'center' }}>+{uniqueEx.length-2} more</span>}
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
+          <span style={{ fontFamily: "'Barlow Condensed'", fontSize: 20, fontWeight: 900, color: T.textPrimary }}>{w.sets.length}</span>
+          <span style={{ fontSize: 10, color: T.textMuted }}>sets</span>
+        </div>
+        <Icon.ChevDown s={14} c={T.textMuted} />
+      </div>
+
+      {open && (
+        <div style={{ padding: compact ? '0 14px 12px' : '0 16px 14px', borderTop: `1px solid ${T.borderLight}` }}>
+          <div style={{ paddingTop: compact ? 10 : 12, display: 'flex', flexDirection: 'column', gap: 5 }}>
+            {w.sets.map(s => (
+              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: T.textSub, fontFamily: "'DM Sans'" }}>
+                <Badge cat={s.exercise.category} label={s.exercise.name} />
+                <span style={{ color: T.textMuted }}>#{s.setNumber}</span>
+                {s.reps   != null && <span>{s.reps} reps</span>}
+                {s.weight != null && <span>· {s.weight}kg</span>}
+                {s.duration != null && <span>{Math.round(s.duration/60)}min</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Workouts Page ──────────────────────────────────────────────────────────────
+function WorkoutsScreen({ compact }) {
+  const [hasActive, setHasActive] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [history, setHistory] = useState(MOCK_STATS.recentWorkouts.filter(w => w.finishedAt));
+
+  function startWorkout() {
+    setStarting(true);
+    setTimeout(() => { setStarting(false); setHasActive(true); }, 700);
+  }
+
+  function finishWorkout(sets) {
+    const newW = {
+      id: Math.random().toString(36).slice(2),
+      startedAt: new Date(Date.now() - 3600000).toISOString(),
+      finishedAt: new Date().toISOString(),
+      sets,
+    };
+    setHasActive(false);
+    setHistory(h => [newW, ...h]);
+  }
+
+  return (
+    <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <AppHeader
+        title="Workouts"
+        right={!hasActive && (
+          <Btn size="sm" loading={starting} onClick={startWorkout}>
+            <Icon.Plus s={14} c="#0d0d12" /> Start
+          </Btn>
+        )}
+      />
+      <div style={{ flex: 1, overflowY: 'auto', padding: compact ? '14px 16px' : '16px 20px', display: 'flex', flexDirection: 'column', gap: compact ? 12 : 14 }}>
+        {hasActive && (
+          <SetLogger
+            session={{ id: 'active', startedAt: new Date().toISOString(), finishedAt: null, sets: [] }}
+            onFinish={finishWorkout}
+            compact={compact}
+          />
+        )}
+
+        {history.length > 0 && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontFamily: "'Barlow Condensed'", fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.textSub }}>
+                History
+              </span>
+              <span style={{ fontFamily: "'DM Sans'", fontSize: 11, color: T.textMuted }}>{history.length} sessions</span>
+            </div>
+            {history.map(w => <HistoryCard key={w.id} w={w} compact={compact} />)}
+          </>
+        )}
+
+        {!hasActive && history.length === 0 && (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, paddingTop: 60 }}>
+            <div style={{ width: 64, height: 64, borderRadius: 18, background: T.bgCard, border: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon.Dumbbell s={28} c={T.textMuted} />
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontFamily: "'Barlow Condensed'", fontSize: 22, fontWeight: 800, textTransform: 'uppercase', color: T.textPrimary, marginBottom: 6 }}>No workouts yet</p>
+              <p style={{ fontFamily: "'DM Sans'", fontSize: 13, color: T.textSub }}>Start your first session to begin tracking</p>
+            </div>
+            <Btn onClick={startWorkout} loading={starting} size="lg">
+              <Icon.Plus s={18} c="#0d0d12" /> Start First Workout
+            </Btn>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Placeholder screens ────────────────────────────────────────────────────────
+function PlaceholderScreen({ icon: IconComp, label, compact }) {
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <AppHeader title={label} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
+        <div style={{ width: 72, height: 72, borderRadius: 22, background: T.bgCard, border: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <IconComp s={32} c={T.textMuted} />
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontFamily: "'Barlow Condensed'", fontSize: 20, fontWeight: 800, textTransform: 'uppercase', color: T.textSub, letterSpacing: '0.04em' }}>{label}</p>
+          <p style={{ fontFamily: "'DM Sans'", fontSize: 12, color: T.textMuted, marginTop: 4 }}>Coming soon in next iteration</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SCALED DEVICE WRAPPER
+// ═══════════════════════════════════════════════════════════════════════════════
+function ScaledDevice({ children }) {
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    function compute() {
+      const s = Math.min((window.innerWidth - 32) / 406, (window.innerHeight - 32) / 860, 1);
+      setScale(s);
+    }
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
+  }, []);
+  return (
+    <div style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+      {children}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ROOT APP
+// ═══════════════════════════════════════════════════════════════════════════════
+function App() {
+  const [tweaks, setTweak] = useTweaks(/*EDITMODE-BEGIN*/{
+    "density": "comfortable"
+  }/*EDITMODE-END*/);
+
+  const compact = tweaks.density === 'compact';
+  const [tab, setTab] = useState('dashboard');
+  const [prevTab, setPrevTab] = useState(null);
+  const [fading, setFading] = useState(false);
+
+  function handleTab(id) {
+    if (id === tab) return;
+    setFading(true);
+    setTimeout(() => { setPrevTab(tab); setTab(id); setFading(false); }, 140);
+  }
+
+  const screens = {
+    dashboard: <DashboardScreen onTab={handleTab} compact={compact} />,
+    workouts:  <WorkoutsScreen compact={compact} />,
+    exercises: <PlaceholderScreen icon={Icon.Search} label="Exercises" compact={compact} />,
+    metrics:   <PlaceholderScreen icon={Icon.Chart} label="Metrics" compact={compact} />,
+  };
+
+  return (
+    <>
+      <style>{`
+        @keyframes spin   { to { transform: rotate(360deg); } }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        @keyframes barGrow{ from{transform:scaleY(0)} to{transform:scaleY(1)} }
+        input::placeholder { color: #3a3a4c; }
+        * { -webkit-tap-highlight-color: transparent; }
+        ::-webkit-scrollbar { width: 0; }
+        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+      `}</style>
+
+      <ScaledDevice>
+        <AndroidDevice dark={true} width={390} height={844}>
+          <div style={{
+            width: '100%', height: '100%',
+            display: 'flex', flexDirection: 'column',
+            background: T.bg,
+          }}>
+            {/* Screen */}
+            <div style={{
+              flex: 1, overflow: 'hidden',
+              display: 'flex', flexDirection: 'column',
+              opacity: fading ? 0 : 1,
+              transition: 'opacity 0.14s ease',
+              animation: !fading ? 'fadeUp 0.2s ease both' : 'none',
+            }}>
+              {screens[tab]}
+            </div>
+
+            {/* Tab bar */}
+            <TabBar active={tab} onTab={handleTab} />
+          </div>
+        </AndroidDevice>
+      </ScaledDevice>
+
+      <TweaksPanel>
+        <TweakSection label="Density">
+          <TweakRadio label="Density" value={tweaks.density} options={['compact', 'comfortable']} onChange={v => setTweak('density', v)} />
+        </TweakSection>
+        <TweakSection label="Start tab">
+          <TweakSelect label="Tab" value={tab} options={['dashboard', 'workouts', 'exercises', 'metrics']} onChange={v => handleTab(v)} />
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

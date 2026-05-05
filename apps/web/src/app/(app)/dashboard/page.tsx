@@ -2,146 +2,234 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { getDashboardStats } from "@/features/dashboard/dashboard.api";
 import { getMeApi } from "@/features/auth";
-import { Card, CardContent, CardHeader } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { PageLoader } from "@/components/ui/Feedback";
+import { T, CAT_COLOR, Icon, FmBadge, FmBtn, FmPageLoader } from "@/components/fm";
+import { useT } from "@/lib/lang-context";
+import { useSettings } from "@/lib/settings-context";
 
-const CATEGORY_VARIANT = {
-  STRENGTH: "strength",
-  CARDIO: "cardio",
-  FLEXIBILITY: "flexibility",
-  MOBILITY: "mobility",
-} as const;
+// ─── Stat Card ─────────────────────────────────────────────────────────────────
+function StatCard({ value, label, sub, accent, flex = 1 }: {
+  value: string | number; label: string; sub?: string; accent?: string; flex?: number;
+}) {
+  return (
+    <div style={{
+      background: T.bgCard, borderRadius: 14, padding: "14px 16px",
+      border: `1px solid ${T.border}`, flex, minWidth: 0,
+      display: "flex", flexDirection: "column", gap: 4,
+    }}>
+      {sub && (
+        <span style={{ fontSize: 10, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.textMuted }}>
+          {sub}
+        </span>
+      )}
+      <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 28, fontWeight: 900, letterSpacing: "-0.01em", color: accent ?? T.accent, lineHeight: 1 }}>
+        {value}
+      </span>
+      <span style={{ fontSize: 11, color: T.textSub, lineHeight: 1.3 }}>{label}</span>
+    </div>
+  );
+}
 
+// ─── Weekly Bar Chart ──────────────────────────────────────────────────────────
+function WeeklyChart({ data }: { data: number[] }) {
+  const t = useT();
+  const days = ["M", "T", "W", "T", "F", "S", "S"];
+  const max = Math.max(...data, 1);
+  const todayRaw = new Date().getDay();
+  const todayIdx = todayRaw === 0 ? 6 : todayRaw - 1;
+
+  return (
+    <div style={{ background: T.bgCard, borderRadius: 14, padding: "16px 16px 12px", border: `1px solid ${T.border}` }}>
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 10 }}>
+        <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 13, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: T.textSub }}>
+          {t.dashboard.thisWeek}
+        </span>
+        <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 13, fontWeight: 700, color: T.accent }}>
+          {data.reduce((a, b) => a + b, 0)} {t.dashboard.sets}
+        </span>
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 60 }}>
+        {data.map((v, i) => {
+          const isToday = i === todayIdx;
+          const h = max > 0 ? Math.max((v / max) * 52, v > 0 ? 6 : 0) : 0;
+          return (
+            <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
+              <div style={{ width: "100%", height: 52, display: "flex", alignItems: "flex-end", borderRadius: 6, overflow: "hidden" }}>
+                <div style={{
+                  width: "100%", height: h || 0, borderRadius: 4,
+                  background: isToday ? T.accent : v > 0 ? T.accentMid : T.bgInput,
+                  transformOrigin: "bottom",
+                  animation: v > 0 ? "fm-barGrow 0.4s ease both" : "none",
+                  animationDelay: `${i * 0.06}s`,
+                }} />
+              </div>
+              <span style={{ fontSize: 10, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontWeight: 700, color: isToday ? T.accent : T.textMuted, letterSpacing: "0.04em" }}>
+                {days[i]}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Workout Row ───────────────────────────────────────────────────────────────
+type RecentWorkout = {
+  id: string;
+  startedAt: string;
+  finishedAt?: string | null;
+  sets: { id: string; setNumber: number; reps?: number | null; weight?: number | null; exercise: { id: string; name: string; category: string } }[];
+};
+
+function WorkoutRow({ w }: { w: RecentWorkout }) {
+  const uniqueEx = [...new Map(w.sets.map((s) => [s.exercise.id, s.exercise])).values()];
+  const dur = w.finishedAt
+    ? Math.round((new Date(w.finishedAt).getTime() - new Date(w.startedAt).getTime()) / 60_000)
+    : null;
+  const cats = [...new Set(uniqueEx.map((e) => e.category))];
+  const catColor = CAT_COLOR[cats[0]] ?? T.accent;
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: `1px solid ${T.borderLight}` }}>
+      <div style={{
+        width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+        background: catColor + "18", border: `1.5px solid ${catColor}30`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        <Icon.Dumbbell s={16} c={catColor} />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+          <span style={{ fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 13, fontWeight: 600, color: T.textPrimary }}>
+            {format(new Date(w.startedAt), "EEE, MMM d")}
+          </span>
+          {dur != null && (
+            <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 11, color: T.textMuted }}>
+              <Icon.Timer s={11} c={T.textMuted} />{dur}m
+            </span>
+          )}
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+          {uniqueEx.slice(0, 3).map((ex) => (
+            <FmBadge key={ex.id} cat={ex.category} label={ex.name.length > 14 ? ex.name.slice(0, 13) + "…" : ex.name} />
+          ))}
+          {uniqueEx.length > 3 && <span style={{ fontSize: 10, color: T.textMuted, alignSelf: "center" }}>+{uniqueEx.length - 3}</span>}
+        </div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3, flexShrink: 0 }}>
+        <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 18, fontWeight: 800, color: T.textPrimary }}>{w.sets.length}</span>
+        <span style={{ fontSize: 10, color: T.textMuted }}>sets</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Page ──────────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
+  const t = useT();
+  const { open: openSettings } = useSettings();
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: getMeApi });
   const { data: stats, isLoading } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: getDashboardStats,
   });
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading) return <FmPageLoader />;
 
-  const statCards = [
-    { label: "Workouts this week", value: stats?.workoutsThisWeek ?? 0, icon: "🏋️", color: "text-indigo-600" },
-    { label: "Total workouts",     value: stats?.totalWorkouts     ?? 0, icon: "📅", color: "text-blue-600"   },
-    { label: "Total sets logged",  value: stats?.totalSets         ?? 0, icon: "📊", color: "text-purple-600" },
-    {
-      label: "Current weight",
-      value: stats?.currentWeight ? `${stats.currentWeight} kg` : "—",
-      icon: "⚖️",
-      color: "text-emerald-600",
-    },
-    { label: "Streak", value: stats?.streak ? `${stats.streak} d` : "—", icon: "🔥", color: "text-orange-500" },
-  ];
+  const weeklyActivity: number[] = (stats as any)?.weeklyActivity ?? [0, 0, 0, 0, 0, 0, 0];
 
   return (
-    <div className="space-y-6">
+    <div style={{ background: T.bg, minHeight: "100%", fontFamily: "var(--font-dm-sans, sans-serif)" }}>
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Hey{user?.name ? `, ${user.name}` : ""} 👋
-          </h1>
-          <p className="text-sm text-gray-500 mt-0.5">{format(new Date(), "EEEE, MMMM d")}</p>
-        </div>
-        <Link href="/workouts">
-          <Button size="sm">+ New workout</Button>
-        </Link>
-      </div>
-
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {statCards.map((s) => (
-          <Card key={s.label} className="p-4">
-            <div className="text-2xl mb-2">{s.icon}</div>
-            <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
-            <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Recent workouts */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900">Recent workouts</h2>
-            <Link href="/workouts" className="text-sm text-indigo-600 hover:underline">View all</Link>
+      <div style={{ padding: "20px 20px 0" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <p style={{ fontSize: 12, color: T.textSub, marginBottom: 2 }}>
+              {format(new Date(), "EEEE, MMMM d")}
+            </p>
+            <h1 style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 34, fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.01em", color: T.textPrimary, lineHeight: 1 }}>
+              {t.dashboard.greeting(user?.name?.split(" ")[0])}
+            </h1>
           </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          {!stats?.recentWorkouts.length ? (
-            <div className="py-8 text-center text-sm text-gray-400">
-              No workouts yet —{" "}
-              <Link href="/workouts" className="text-indigo-500 hover:underline">
-                start your first one
-              </Link>
+          {/* Avatar */}
+          <button
+            onClick={openSettings}
+            style={{
+              width: 44, height: 44, borderRadius: "50%",
+              background: `linear-gradient(135deg, ${T.accent} 0%, oklch(0.62 0.22 50) 100%)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: `0 0 0 2px ${T.bg}, 0 0 0 4px ${T.accentMid}`,
+              border: "none", cursor: "pointer", flexShrink: 0,
+            }}
+          >
+            <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 17, fontWeight: 800, color: "#0d0d12" }}>
+              {user?.name ? user.name.slice(0, 2).toUpperCase() : "FM"}
+            </span>
+          </button>
+        </div>
+
+        {/* Streak banner */}
+        {stats?.streak ? (
+          <div style={{ marginTop: 14, padding: "10px 14px", background: T.accentDim, borderRadius: 12, border: `1px solid ${T.accentMid}`, display: "flex", alignItems: "center", gap: 10 }}>
+            <Icon.Flame s={18} c={T.accentRaw} />
+            <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 14, fontWeight: 700, color: T.accent, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              {t.dashboard.streak(stats.streak)}
+            </span>
+            <span style={{ fontSize: 12, color: T.textSub, marginLeft: "auto" }}>{t.dashboard.keepItUp}</span>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Scrollable content */}
+      <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+
+        {/* Stat cards */}
+        <div style={{ display: "flex", gap: 8 }}>
+          <StatCard value={stats?.workoutsThisWeek ?? 0} label={t.dashboard.workoutsThisWeek} sub={t.dashboard.workoutsSub} />
+          <StatCard value={stats?.streak ?? 0} label={t.dashboard.streakLabel} sub={t.dashboard.streakSub} accent={T.accentRaw} />
+          <StatCard value={stats?.currentWeight ? `${stats.currentWeight}` : "—"} label={t.dashboard.weightLabel} sub={t.dashboard.weightSub} accent={T.mobility} />
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <StatCard value={stats?.totalWorkouts ?? 0} label={t.dashboard.totalWorkouts} sub={t.dashboard.allTime} accent={T.strength} flex={2} />
+          <StatCard value={stats?.totalSets ?? 0} label={t.dashboard.totalSets} sub={t.dashboard.allTime} accent={T.flexibility} flex={2} />
+        </div>
+
+        {/* Weekly chart */}
+        <WeeklyChart data={weeklyActivity} />
+
+        {/* Recent workouts */}
+        <div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: T.textSub }}>
+              {t.dashboard.recent}
+            </span>
+            <Link href="/workouts" style={{ color: T.accent, fontSize: 12, fontWeight: 500, textDecoration: "none" }}>
+              {t.dashboard.seeAll}
+            </Link>
+          </div>
+
+          {stats?.recentWorkouts?.length ? (
+            <div style={{ background: T.bgCard, borderRadius: 14, padding: "0 14px", border: `1px solid ${T.border}` }}>
+              {(stats.recentWorkouts as RecentWorkout[]).map((w) => (
+                <WorkoutRow key={w.id} w={w} />
+              ))}
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
-              {stats.recentWorkouts.map((w) => {
-                const uniqueExercises = [...new Map(w.sets.map((s) => [s.exercise.id, s.exercise])).values()];
-                const totalSets = w.sets.length;
-                const duration = w.finishedAt
-                  ? Math.round((new Date(w.finishedAt).getTime() - new Date(w.startedAt).getTime()) / 60_000)
-                  : null;
-
-                return (
-                  <div key={w.id} className="py-3 flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-gray-900">
-                          {format(new Date(w.startedAt), "MMM d")}
-                        </span>
-                        <Badge variant={w.finishedAt ? "done" : "active"}>
-                          {w.finishedAt ? "Done" : "Active"}
-                        </Badge>
-                        {duration != null && (
-                          <span className="text-xs text-gray-400">{duration} min</span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-1 mt-1.5">
-                        {uniqueExercises.slice(0, 4).map((ex) => (
-                          <Badge key={ex.id} variant={CATEGORY_VARIANT[ex.category as keyof typeof CATEGORY_VARIANT] ?? "default"}>
-                            {ex.name}
-                          </Badge>
-                        ))}
-                        {uniqueExercises.length > 4 && (
-                          <Badge>+{uniqueExercises.length - 4} more</Badge>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-400 shrink-0 text-right">
-                      <div>{totalSets} sets</div>
-                      <div>{formatDistanceToNow(new Date(w.startedAt), { addSuffix: true })}</div>
-                    </div>
-                  </div>
-                );
-              })}
+            <div style={{ background: T.bgCard, borderRadius: 14, padding: "24px 14px", border: `1px solid ${T.border}`, textAlign: "center" }}>
+              <p style={{ fontSize: 13, color: T.textSub }}>{t.dashboard.noWorkouts}</p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Quick links */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { href: "/exercises", label: "Browse exercises", icon: "🔍" },
-          { href: "/workouts",  label: "Start workout",   icon: "▶️" },
-          { href: "/metrics",   label: "Log weight",      icon: "⚖️" },
-          { href: "/workouts",  label: "Workout history", icon: "📋" },
-        ].map((l) => (
-          <Link key={l.href + l.label} href={l.href}>
-            <Card className="p-4 hover:border-indigo-300 hover:shadow-sm transition cursor-pointer">
-              <div className="text-2xl mb-1">{l.icon}</div>
-              <div className="text-sm font-medium text-gray-700">{l.label}</div>
-            </Card>
-          </Link>
-        ))}
+        {/* Start workout CTA */}
+        <Link href="/workouts" style={{ textDecoration: "none" }}>
+          <FmBtn size="lg" style={{ width: "100%", borderRadius: 14 }}>
+            <Icon.Plus s={18} c="#0d0d12" /> {t.dashboard.startWorkout}
+          </FmBtn>
+        </Link>
       </div>
     </div>
   );

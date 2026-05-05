@@ -3,6 +3,7 @@ import { apiClient } from "@/lib/api-client";
 export type Exercise = {
   id: string;
   name: string;
+  nameRu: string | null;
   category: "STRENGTH" | "CARDIO" | "FLEXIBILITY" | "MOBILITY";
   muscleGroups: string[];
   equipment: string | null;
@@ -22,6 +23,7 @@ export async function getExercises(params: {
   equipment?: string;
   page?: number;
   limit?: number;
+  lang?: string;
 }): Promise<ExercisesPage> {
   const res = await apiClient.get<ExercisesPage>("/exercises", { params });
   return res.data;
@@ -31,4 +33,3 @@ export async function getEquipmentList(): Promise<string[]> {
   const res = await apiClient.get<string[]>("/exercises/equipment");
   return res.data;
 }
-

@@ -48,6 +48,14 @@ export async function finishWorkout(id: string, notes?: string): Promise<Workout
   return res.data;
 }
 
+export async function deleteAllWorkouts(): Promise<void> {
+  await apiClient.delete("/workouts");
+}
+
+export async function updateSessionNotes(id: string, notes: string): Promise<void> {
+  await apiClient.patch(`/workouts/${id}/notes`, { notes });
+}
+
 export async function logSets(sessionId: string, sets: CreateSetInput[]): Promise<WorkoutSet[]> {
   const res = await apiClient.post<WorkoutSet[]>(`/workouts/${sessionId}/sets`, { sets });
   return res.data;
