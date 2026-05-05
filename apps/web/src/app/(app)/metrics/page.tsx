@@ -8,7 +8,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
 } from "recharts";
 import { getMetrics, logMetric, type BodyMetric } from "@/features/metrics/metrics.api";
-import { T, FmBtn, FmPageLoader, AppHeader, Icon, FmStyles } from "@/components/fm";
+import { T, FmBtn, FmPageLoader, AppHeader, FmStyles } from "@/components/fm";
 import { useT } from "@/lib/lang-context";
 import { useSettings } from "@/lib/settings-context";
 
@@ -90,7 +90,7 @@ function ChartTooltip({ active, payload, label }: any) {
 function HistoryRow({ m, isLast }: { m: BodyMetric; isLast: boolean }) {
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 0,
+      display: "flex", alignItems: "center",
       padding: "11px 16px",
       borderBottom: isLast ? "none" : `1px solid ${T.borderLight}`,
     }}>
@@ -103,7 +103,10 @@ function HistoryRow({ m, isLast }: { m: BodyMetric; isLast: boolean }) {
       <span style={{ flex: 1, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 16, fontWeight: 800, color: m.bodyFat != null ? T.mobility : T.textMuted }}>
         {m.bodyFat != null ? `${m.bodyFat}%` : "—"}
       </span>
-      <span style={{ flex: 1.5, fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 12, color: T.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
+      <span style={{ flex: 1, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 16, fontWeight: 800, color: m.muscleMass != null ? T.flexibility : T.textMuted }}>
+        {m.muscleMass != null ? `${m.muscleMass} kg` : "—"}
+      </span>
+      <span style={{ flex: 1.2, fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 12, color: T.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
         {m.notes ?? "—"}
       </span>
     </div>
@@ -120,6 +123,7 @@ export default function MetricsPage() {
   const [date, setDate] = useState(today);
   const [weight, setWeight] = useState("");
   const [bodyFat, setBodyFat] = useState("");
+  const [muscleMass, setMuscleMass] = useState("");
   const [notes, setNotes] = useState("");
   const [formOpen, setFormOpen] = useState(false);
 
@@ -132,14 +136,15 @@ export default function MetricsPage() {
     mutationFn: () =>
       logMetric({
         date,
-        weight: weight ? Number(weight) : undefined,
-        bodyFat: bodyFat ? Number(bodyFat) : undefined,
-        notes: notes || undefined,
+        weight:     weight     ? Number(weight)     : undefined,
+        bodyFat:    bodyFat    ? Number(bodyFat)    : undefined,
+        muscleMass: muscleMass ? Number(muscleMass) : undefined,
+        notes:      notes || undefined,
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["metrics"] });
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
-      setWeight(""); setBodyFat(""); setNotes("");
+      setWeight(""); setBodyFat(""); setMuscleMass(""); setNotes("");
       setFormOpen(false);
       setTimeout(reset, 2000);
     },
@@ -273,6 +278,7 @@ export default function MetricsPage() {
                 <DarkInput label={t.metrics.date} type="date" value={date} onChange={setDate} />
                 <DarkInput label={t.metrics.weight} type="number" value={weight} onChange={setWeight} placeholder="e.g. 75.5" min={0} step={0.1} />
                 <DarkInput label={t.metrics.bodyFatPct} type="number" value={bodyFat} onChange={setBodyFat} placeholder={t.metrics.optional} min={0} max={100} step={0.1} />
+                <DarkInput label={t.metrics.muscleMassKg} type="number" value={muscleMass} onChange={setMuscleMass} placeholder={t.metrics.optional} min={0} step={0.1} />
                 <DarkInput label={t.metrics.notes} value={notes} onChange={setNotes} placeholder={t.metrics.optional} />
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -309,6 +315,7 @@ export default function MetricsPage() {
                 { label: t.metrics.date, flex: 1.2 },
                 { label: t.metrics.weightCol, flex: 1 },
                 { label: t.metrics.bodyFatCol, flex: 1 },
+                { label: t.metrics.muscleMassCol, flex: 1 },
                 { label: t.metrics.notesCol, flex: 1.5 },
               ].map((col) => (
                 <span key={col.label} style={{
@@ -329,4 +336,3 @@ export default function MetricsPage() {
     </div>
   );
 }
-
