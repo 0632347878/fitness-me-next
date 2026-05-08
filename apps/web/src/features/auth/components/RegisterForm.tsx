@@ -9,7 +9,7 @@ import { registerSchema, type RegisterInput } from "../auth.schemas";
 
 const T = {
   bgInput: "#1e1e2a",
-  border: "#2a2a38",
+  border: "#3e3e52",
   accent: "oklch(0.72 0.18 35)",
   textPrimary: "#f0ede8",
   textSub: "#8a8898",
@@ -74,7 +74,9 @@ function FInput({ id, label, type = "text", placeholder, error, autoComplete, re
           </button>
         )}
       </div>
-      {error && <p style={{ fontSize: 11, color: T.danger, fontFamily: "var(--font-dm-sans, sans-serif)" }}>{error}</p>}
+      <p style={{ fontSize: 11, color: T.danger, fontFamily: "var(--font-dm-sans, sans-serif)", minHeight: 16 }}>
+        {error ?? ""}
+      </p>
     </div>
   );
 }
@@ -207,7 +209,7 @@ export function RegisterForm() {
     <>
       <style>{`@keyframes fm-spin { to { transform: rotate(360deg); } }`}</style>
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: step === 1 ? 32 : 28 }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: step === 1 ? 32 : 28, paddingTop: 8 }}>
         {/* Back button on step 2 */}
         {step === 2 && (
           <button type="button" onClick={() => setStep(1)}

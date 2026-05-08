@@ -9,7 +9,7 @@ import { loginSchema, type LoginInput } from "../auth.schemas";
 
 const T = {
   bgInput: "#1e1e2a",
-  border: "#2a2a38",
+  border: "#3e3e52",
   accent: "oklch(0.72 0.18 35)",
   textPrimary: "#f0ede8",
   textSub: "#8a8898",
@@ -84,7 +84,10 @@ function FInput({ id, label, type = "text", placeholder, error, autoComplete, re
           </button>
         )}
       </div>
-      {error && <p style={{ fontSize: 11, color: T.danger, fontFamily: "var(--font-dm-sans, sans-serif)" }}>{error}</p>}
+      {/* always reserve space so layout doesn't shift */}
+      <p style={{ fontSize: 11, color: T.danger, fontFamily: "var(--font-dm-sans, sans-serif)", minHeight: 16 }}>
+        {error ?? ""}
+      </p>
     </div>
   );
 }
@@ -125,11 +128,13 @@ export function LoginForm() {
     <>
       <style>{`@keyframes fm-spin { to { transform: rotate(360deg); } }`}</style>
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 40 }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 40, paddingTop: 8 }}>
         {/* Hero */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 28 }}>
           <Logo />
           <div style={{ textAlign: "center" }}>
+            {/* spacer = "Step 1 of 2" line height on register, prevents layout jump on page switch */}
+            <div style={{ height: 22 }} />
             <h1 style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 40, fontWeight: 900, color: T.textPrimary, letterSpacing: "-0.01em", lineHeight: 1.05, textTransform: "uppercase", margin: 0 }}>
               Welcome back
             </h1>
