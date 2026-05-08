@@ -234,12 +234,11 @@ export function RegisterForm() {
     error?.response?.data?.message ?? (error ? "Registration failed" : null);
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center py-12 px-4"
-      style={{ background: "var(--fm-bg)", fontFamily: "var(--font-dm-sans, sans-serif)" }}
-    >
-      <div className="w-full max-w-sm">
+    <div style={{ fontFamily: "var(--font-dm-sans, sans-serif)" }}>
+      {/* Logo shown only on mobile */}
+      <div className="md:hidden">
         <Logo />
+      </div>
 
         <div
           className="rounded-2xl p-8"
@@ -355,6 +354,5 @@ export function RegisterForm() {
           <span className="underline cursor-pointer">Privacy Policy</span>.
         </p>
       </div>
-    </div>
   );
 }

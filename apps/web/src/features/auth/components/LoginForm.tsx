@@ -185,12 +185,11 @@ export function LoginForm() {
     error?.response?.data?.message ?? (error ? "Login failed" : null);
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center py-12 px-4"
-      style={{ background: "var(--fm-bg)", fontFamily: "var(--font-dm-sans, sans-serif)" }}
-    >
-      <div className="w-full max-w-sm">
+    <div style={{ fontFamily: "var(--font-dm-sans, sans-serif)" }}>
+      {/* Logo shown only on mobile — desktop shows it in the brand panel */}
+      <div className="md:hidden">
         <Logo />
+      </div>
 
         {/* Card */}
         <div
@@ -284,6 +283,5 @@ export function LoginForm() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
