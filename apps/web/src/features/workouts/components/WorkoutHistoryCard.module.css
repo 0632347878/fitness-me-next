@@ -1,0 +1,185 @@
+.card {
+  background: var(--fm-bg-card);
+  border-radius: 14px;
+  border: 1px solid var(--fm-border);
+  overflow: hidden;
+}
+
+.cardHeader {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.iconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.dateLabel {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fm-text-primary);
+}
+
+.durationLabel {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--fm-text-muted);
+}
+
+.badgesRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.moreBadge {
+  font-size: 10px;
+  color: var(--fm-text-muted);
+  align-self: center;
+}
+
+.setCountWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  margin-right: 4px;
+}
+
+.setCountNum {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--fm-text-primary);
+}
+
+.setCountLabel {
+  font-size: 10px;
+  color: var(--fm-text-muted);
+}
+
+/* ── Expanded body ── */
+
+.body {
+  padding: 0 16px 14px;
+  border-top: 1px solid var(--fm-border);
+}
+
+.note {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: var(--fm-bg-input);
+  border-radius: 10px;
+  border: 1px solid var(--fm-border);
+}
+
+.noteLabel {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fm-text-muted);
+}
+
+.noteText {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 13px;
+  color: var(--fm-text-sub);
+  margin-top: 3px;
+}
+
+/* ── Exercise group ── */
+
+.exGroup {
+  margin-top: 12px;
+}
+
+.exGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.exGroupDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.exGroupName {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.setsList {
+  padding-left: 14px;
+}
+
+.setRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--fm-border);
+}
+
+.setRow:last-child {
+  border-bottom: none;
+}
+
+.setNum {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fm-text-muted);
+  width: 22px;
+  flex-shrink: 0;
+}
+
+.setWeight {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--fm-text-primary);
+  flex: 1;
+}
+
+.setDivider {
+  width: 1px;
+  height: 16px;
+  background: var(--fm-border);
+  flex-shrink: 0;
+}
+
+.setReps {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--fm-text-primary);
+}
+

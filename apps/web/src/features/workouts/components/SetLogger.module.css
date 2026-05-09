@@ -1,0 +1,287 @@
+/* ── SetRow ── */
+
+.setRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  height: 56px;
+  border-radius: 14px;
+  margin-bottom: 6px;
+  border: 1px solid var(--fm-border);
+  background: var(--fm-bg-card);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.setRow.done {
+  background: rgba(34, 197, 94, 0.06);
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+.setRow.isNew {
+  animation: fm-fadeUp 0.2s ease both;
+}
+
+.setIndex {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fm-text-muted);
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.inputGroup {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.inputGroup.reps {
+  padding-left: 10px;
+}
+
+.numInput {
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--fm-text-muted);
+  text-align: left;
+}
+
+.numInput.weightInput {
+  width: 68px;
+}
+
+.numInput.repsInput {
+  width: 52px;
+}
+
+.numInput.hasValue {
+  color: var(--fm-text-primary);
+}
+
+.inputUnit {
+  font-size: 12px;
+  color: var(--fm-text-muted);
+}
+
+.divider {
+  width: 1px;
+  height: 28px;
+  background: var(--fm-border);
+  flex-shrink: 0;
+}
+
+.actionBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.actionBtn.undoBtn {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--fm-success);
+}
+
+.actionBtn.removeBtn {
+  background: var(--fm-bg-input);
+  color: var(--fm-text-muted);
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* ── SetLogger ── */
+
+.logger {
+  background: var(--fm-bg-card);
+  border-radius: 16px;
+  border: 1px solid var(--fm-border);
+}
+
+.sessionHeader {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--fm-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.activeBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.activeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fm-success);
+  animation: fm-pulse 2s infinite;
+}
+
+.activeLabel {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fm-success);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.elapsed {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--fm-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Action row under sets */
+.actionRow {
+  display: flex;
+  border-top: 1px solid var(--fm-border);
+}
+
+.actionRowBtn {
+  flex: 1;
+  padding: 12px 0;
+  background: none;
+  border: none;
+  color: var(--fm-text-sub);
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.actionRowBtn.hasNote {
+  color: var(--fm-accent);
+}
+
+.actionRowBtn:first-child {
+  border-right: 1px solid var(--fm-border);
+}
+
+/* History button */
+.historyBtn {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--fm-bg);
+  border: 1px solid var(--fm-border);
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.historyBtnLabel {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fm-text-sub);
+  flex: 1;
+  text-align: left;
+}
+
+/* Volume summary */
+.volumeSummary {
+  padding: 10px 14px;
+  background: rgba(232, 133, 74, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(232, 133, 74, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.volumeLabel {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 12px;
+  color: var(--fm-text-sub);
+}
+
+.volumeValue {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--fm-accent);
+}
+
+/* Logged summary */
+.loggedSection {
+  border-top: 1px solid var(--fm-border);
+  padding-top: 12px;
+}
+
+.loggedLabel {
+  font-size: 10px;
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fm-text-muted);
+}
+
+.loggedList {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.loggedGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.loggedGroupBadge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.loggedSetRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--fm-text-sub);
+  padding-left: 6px;
+  padding-bottom: 2px;
+}
+
+.loggedSetNum {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-weight: 700;
+  color: var(--fm-text-muted);
+  width: 16px;
+}
+

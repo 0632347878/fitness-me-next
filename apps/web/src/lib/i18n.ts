@@ -32,7 +32,7 @@ export const translations = {
       finish: "Finish",
       active: "Active",
       logSets: "Log Sets",
-      addSet: "+ Add set",
+      addSet: "Add set",
       history: "History",
       sessions: "sessions",
       noWorkouts: "No workouts yet",
