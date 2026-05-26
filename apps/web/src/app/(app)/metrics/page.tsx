@@ -11,23 +11,15 @@ import { getMetrics, logMetric, type BodyMetric } from "@/features/metrics/metri
 import { T, FmBtn, FmPageLoader, AppHeader, FmStyles } from "@/components/fm";
 import { useT } from "@/lib/lang-context";
 import { useSettings } from "@/lib/settings-context";
+import s from "./page.module.css";
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
-function StatCard({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: string }) {
+function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div style={{
-      flex: 1, background: T.bgCard, borderRadius: 14, padding: "14px 16px",
-      border: `1px solid ${T.border}`, display: "flex", flexDirection: "column", gap: 4, minWidth: 0,
-    }}>
-      {sub && (
-        <span style={{ fontSize: 10, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, color: T.textMuted }}>
-          {sub}
-        </span>
-      )}
-      <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 26, fontWeight: 900, letterSpacing: "-0.01em", color: accent ?? T.accent, lineHeight: 1 }}>
-        {value}
-      </span>
-      <span style={{ fontSize: 11, color: T.textSub, lineHeight: 1.3 }}>{label}</span>
+    <div className={s.statCard}>
+      {sub && <span className={s.statSub}>{sub}</span>}
+      <span className={s.statValue}>{value}</span>
+      <span className={s.statLabel}>{label}</span>
     </div>
   );
 }
@@ -40,28 +32,14 @@ function DarkInput({
   onChange: (v: string) => void; placeholder?: string;
   min?: number; max?: number; step?: number;
 }) {
-  const [focused, setFocused] = useState(false);
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <label style={{
-        fontFamily: "var(--font-barlow-condensed, sans-serif)",
-        fontSize: 11, fontWeight: 700, letterSpacing: "0.1em",
-        textTransform: "uppercase" as const, color: T.textMuted,
-      }}>
-        {label}
-      </label>
+    <div className={s.inputWrap}>
+      <label className={s.inputLabel}>{label}</label>
       <input
+        className={s.input}
         type={type} value={value} placeholder={placeholder}
         min={min} max={max} step={step}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
         onChange={(e) => onChange(e.target.value)}
-        style={{
-          padding: "10px 12px", borderRadius: 10,
-          background: T.bgInput, border: `1.5px solid ${focused ? T.accent : T.border}`,
-          color: T.textPrimary, fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 14,
-          outline: "none", transition: "border-color 0.15s", width: "100%",
-        }}
       />
     </div>
   );
@@ -71,44 +49,30 @@ function DarkInput({
 function ChartTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{
-      background: T.bgCard, border: `1px solid ${T.border}`,
-      borderRadius: 10, padding: "8px 12px",
-      boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
-    }}>
-      <p style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: T.textMuted, marginBottom: 4 }}>{label}</p>
+    <div className={s.tooltip}>
+      <p className={s.tooltipLabel}>{label}</p>
       {payload.map((p: any) => (
-        <p key={p.dataKey} style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 18, fontWeight: 900, color: T.accentRaw }}>
-          {p.value} {p.unit}
-        </p>
+        <p key={p.dataKey} className={s.tooltipValue}>{p.value} {p.unit}</p>
       ))}
     </div>
   );
 }
 
 // ─── History row ──────────────────────────────────────────────────────────────
-function HistoryRow({ m, isLast }: { m: BodyMetric; isLast: boolean }) {
+function HistoryRow({ m }: { m: BodyMetric }) {
   return (
-    <div style={{
-      display: "flex", alignItems: "center",
-      padding: "11px 16px",
-      borderBottom: isLast ? "none" : `1px solid ${T.borderLight}`,
-    }}>
-      <span style={{ flex: 1.2, fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 13, color: T.textSub }}>
-        {format(new Date(m.date), "MMM d, yyyy")}
-      </span>
-      <span style={{ flex: 1, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 16, fontWeight: 800, color: m.weight != null ? T.accent : T.textMuted }}>
+    <div className={s.historyRow}>
+      <span className={s.historyDate}>{format(new Date(m.date), "MMM d, yyyy")}</span>
+      <span className={s.historyVal} style={{ color: m.weight != null ? T.accent : T.textMuted }}>
         {m.weight != null ? `${m.weight} kg` : "—"}
       </span>
-      <span style={{ flex: 1, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 16, fontWeight: 800, color: m.bodyFat != null ? T.mobility : T.textMuted }}>
+      <span className={s.historyVal} style={{ color: m.bodyFat != null ? T.mobility : T.textMuted }}>
         {m.bodyFat != null ? `${m.bodyFat}%` : "—"}
       </span>
-      <span style={{ flex: 1, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 16, fontWeight: 800, color: m.muscleMass != null ? T.flexibility : T.textMuted }}>
+      <span className={s.historyVal} style={{ color: m.muscleMass != null ? T.flexibility : T.textMuted }}>
         {m.muscleMass != null ? `${m.muscleMass} kg` : "—"}
       </span>
-      <span style={{ flex: 1.2, fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 12, color: T.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
-        {m.notes ?? "—"}
-      </span>
+      <span className={s.historyNotes}>{m.notes ?? "—"}</span>
     </div>
   );
 }
@@ -162,82 +126,61 @@ export default function MetricsPage() {
     }));
 
   const latest = metrics.find((m) => m.weight != null);
-  const avg = chartData.length ? (chartData.reduce((s, d) => s + (d.weight ?? 0), 0) / chartData.length).toFixed(1) : null;
+  const avg = chartData.length
+    ? (chartData.reduce((acc, d) => acc + (d.weight ?? 0), 0) / chartData.length).toFixed(1)
+    : null;
 
   return (
-    <div style={{ background: T.bg, minHeight: "100%", display: "flex", flexDirection: "column" }}>
+    <div className={s.page}>
       <FmStyles />
       <AppHeader
         title={t.metrics.title}
         onAccountClick={openSettings}
         right={
           <FmBtn size="sm" onClick={() => setFormOpen((v) => !v)}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
             {t.metrics.logMeasurement}
           </FmBtn>
         }
       />
 
-      <div style={{ flex: 1, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className={s.content}>
 
         {/* Stat cards */}
         {latest ? (
-          <div style={{ display: "flex", gap: 8 }}>
-            <StatCard
-              value={latest.weight != null ? `${latest.weight}` : "—"}
-              label={t.metrics.currentWeight}
-              sub={t.metrics.weightCol}
-              accent={T.accentRaw}
-            />
-            <StatCard
-              value={latest.bodyFat != null ? `${latest.bodyFat}%` : "—"}
-              label={t.metrics.bodyFat}
-              sub="BF%"
-              accent={T.mobility}
-            />
-            <StatCard
-              value={latest.muscleMass != null ? `${latest.muscleMass}` : "—"}
-              label={t.metrics.muscleMass}
-              sub="kg"
-              accent={T.flexibility}
-            />
+          <div className={s.statCardsRow}>
+            <StatCard value={latest.weight != null ? `${latest.weight}` : "—"} label={t.metrics.currentWeight} sub={t.metrics.weightCol} />
+            <StatCard value={latest.bodyFat != null ? `${latest.bodyFat}%` : "—"} label={t.metrics.bodyFat} sub="BF%" />
+            <StatCard value={latest.muscleMass != null ? `${latest.muscleMass}` : "—"} label={t.metrics.muscleMass} sub="kg" />
           </div>
         ) : (
-          <div style={{
-            background: T.bgCard, borderRadius: 14, padding: "20px 20px",
-            border: `1px solid ${T.border}`, textAlign: "center",
-          }}>
-            <p style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 16, fontWeight: 800, textTransform: "uppercase" as const, color: T.textSub, marginBottom: 4 }}>
-              {t.metrics.noWeightData}
-            </p>
-            <p style={{ fontSize: 13, color: T.textMuted, fontFamily: "var(--font-dm-sans, sans-serif)" }}>
-              {t.metrics.noWeightDataBody}
-            </p>
+          <div className={s.emptyCard}>
+            <p className={s.emptyTitle}>{t.metrics.noWeightData}</p>
+            <p className={s.emptyBody}>{t.metrics.noWeightDataBody}</p>
           </div>
         )}
 
         {/* Chart */}
         {chartData.length > 1 && (
-          <div style={{ background: T.bgCard, borderRadius: 16, border: `1px solid ${T.border}`, overflow: "hidden" }}>
-            <div style={{ padding: "14px 16px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: T.textMuted }}>
-                {t.metrics.weightHistory}
-              </span>
+          <div className={s.chartCard}>
+            <div className={s.chartHeader}>
+              <span className={s.chartTitle}>{t.metrics.weightHistory}</span>
               {avg && (
-                <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 13, fontWeight: 700, color: T.textSub }}>
-                  avg <span style={{ color: T.accentRaw }}>{avg} kg</span>
+                <span className={s.chartAvg}>
+                  avg <span className={s.chartAvgValue}>{avg} kg</span>
                 </span>
               )}
             </div>
-            <div style={{ padding: "10px 0 6px" }}>
+            <div className={s.chartBody}>
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={chartData} margin={{ top: 8, right: 20, bottom: 0, left: -10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={T.borderLight} vertical={false} />
                   <XAxis
                     dataKey="date"
                     tick={{ fill: T.textMuted, fontSize: 10, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontWeight: 700 }}
-                    tickLine={false} axisLine={false}
-                    interval="preserveStartEnd"
+                    tickLine={false} axisLine={false} interval="preserveStartEnd"
                   />
                   <YAxis
                     domain={["auto", "auto"]}
@@ -245,9 +188,7 @@ export default function MetricsPage() {
                     tickLine={false} axisLine={false} unit=" kg"
                   />
                   <Tooltip content={<ChartTooltip />} />
-                  {avg && (
-                    <ReferenceLine y={Number(avg)} stroke={T.accentMid} strokeDasharray="4 4" strokeWidth={1} />
-                  )}
+                  {avg && <ReferenceLine y={Number(avg)} stroke={T.accentMid} strokeDasharray="4 4" strokeWidth={1} />}
                   <Line
                     type="monotone" dataKey="weight" unit="kg"
                     stroke={T.accentRaw} strokeWidth={2}
@@ -260,44 +201,26 @@ export default function MetricsPage() {
           </div>
         )}
 
-        {/* Log form (collapsible) */}
+        {/* Log form */}
         {formOpen && (
-          <div style={{
-            background: T.bgCard, borderRadius: 16,
-            border: `1px solid ${T.border}`,
-            overflow: "hidden",
-            animation: "fm-fadeUp 0.2s ease",
-          }}>
-            <div style={{ padding: "14px 16px", borderBottom: `1px solid ${T.border}` }}>
-              <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 15, fontWeight: 800, textTransform: "uppercase" as const, letterSpacing: "0.06em", color: T.textPrimary }}>
-                {t.metrics.logMeasurement}
-              </span>
+          <div className={s.formCard}>
+            <div className={s.formHeader}>
+              <span className={s.formTitle}>{t.metrics.logMeasurement}</span>
             </div>
-            <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div className={s.formBody}>
+              <div className={s.formGrid}>
                 <DarkInput label={t.metrics.date} type="date" value={date} onChange={setDate} />
                 <DarkInput label={t.metrics.weight} type="number" value={weight} onChange={setWeight} placeholder="e.g. 75.5" min={0} step={0.1} />
                 <DarkInput label={t.metrics.bodyFatPct} type="number" value={bodyFat} onChange={setBodyFat} placeholder={t.metrics.optional} min={0} max={100} step={0.1} />
                 <DarkInput label={t.metrics.muscleMassKg} type="number" value={muscleMass} onChange={setMuscleMass} placeholder={t.metrics.optional} min={0} step={0.1} />
                 <DarkInput label={t.metrics.notes} value={notes} onChange={setNotes} placeholder={t.metrics.optional} />
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <FmBtn
-                  loading={isPending}
-                  disabled={!weight && !bodyFat}
-                  onClick={() => log()}
-                  style={{ flex: 1 }}
-                >
+              <div className={s.formActions}>
+                <FmBtn loading={isPending} disabled={!weight && !bodyFat} onClick={() => log()} style={{ flex: 1 }}>
                   {t.metrics.save}
                 </FmBtn>
-                <FmBtn variant="ghost" onClick={() => setFormOpen(false)}>
-                  ✕
-                </FmBtn>
-                {isSuccess && (
-                  <span style={{ fontSize: 13, color: T.success, fontFamily: "var(--font-dm-sans, sans-serif)", fontWeight: 600 }}>
-                    {t.metrics.saved}
-                  </span>
-                )}
+                <FmBtn variant="ghost" onClick={() => setFormOpen(false)}>✕</FmBtn>
+                {isSuccess && <span className={s.savedMsg}>{t.metrics.saved}</span>}
               </div>
             </div>
           </div>
@@ -305,12 +228,8 @@ export default function MetricsPage() {
 
         {/* History table */}
         {metrics.length > 0 && (
-          <div style={{ background: T.bgCard, borderRadius: 16, border: `1px solid ${T.border}`, overflow: "hidden" }}>
-            {/* thead */}
-            <div style={{
-              display: "flex", padding: "10px 16px",
-              borderBottom: `1px solid ${T.border}`,
-            }}>
+          <div className={s.historyCard}>
+            <div className={s.historyHead}>
               {[
                 { label: t.metrics.date, flex: 1.2 },
                 { label: t.metrics.weightCol, flex: 1 },
@@ -318,20 +237,17 @@ export default function MetricsPage() {
                 { label: t.metrics.muscleMassCol, flex: 1 },
                 { label: t.metrics.notesCol, flex: 1.5 },
               ].map((col) => (
-                <span key={col.label} style={{
-                  flex: col.flex, fontFamily: "var(--font-barlow-condensed, sans-serif)",
-                  fontSize: 10, fontWeight: 700, letterSpacing: "0.1em",
-                  textTransform: "uppercase" as const, color: T.textMuted,
-                }}>
+                <span key={col.label} className={s.historyHeadCell} style={{ flex: col.flex }}>
                   {col.label}
                 </span>
               ))}
             </div>
-            {metrics.map((m: BodyMetric, i) => (
-              <HistoryRow key={m.id} m={m} isLast={i === metrics.length - 1} />
+            {metrics.map((m: BodyMetric) => (
+              <HistoryRow key={m.id} m={m} />
             ))}
           </div>
         )}
+
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Barlow_Condensed, DM_Sans } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
 
@@ -30,18 +31,22 @@ export const metadata: Metadata = {
   description: "Track your workouts, metrics and nutrition",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const theme = (cookieStore.get("fm-theme")?.value === "light" ? "light" : "dark") as "light" | "dark";
+
   return (
     <html
       lang="en"
+      data-theme={theme === "light" ? "light" : ""}
       className={`${geistSans.variable} ${geistMono.variable} ${barlowCondensed.variable} ${dmSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <Providers>{children}</Providers>
+        <Providers initialTheme={theme as "light" | "dark"}>{children}</Providers>
       </body>
     </html>
   );

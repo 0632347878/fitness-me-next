@@ -68,6 +68,9 @@ export const translations = {
     settings: {
       title: "Account",
       language: "Language",
+      appearance: "Appearance",
+      themeDark: "Dark",
+      themeLight: "Light",
       dangerZone: "Danger Zone",
       resetHistory: "Reset Workout History",
       resetHistoryDesc: "Permanently delete all workout sessions and sets. This cannot be undone.",
@@ -171,6 +174,9 @@ export const translations = {
     settings: {
       title: "Аккаунт",
       language: "Язык",
+      appearance: "Тема",
+      themeDark: "Тёмная",
+      themeLight: "Светлая",
       dangerZone: "Опасная зона",
       resetHistory: "Сбросить историю тренировок",
       resetHistoryDesc: "Удалить все тренировки и подходы. Это действие необратимо.",

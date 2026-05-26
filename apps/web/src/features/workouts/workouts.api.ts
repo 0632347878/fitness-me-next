@@ -19,6 +19,9 @@ export type WorkoutSession = {
   sets: WorkoutSet[];
 };
 
+/** A finished (historical) workout session. finishedAt is guaranteed non-null. */
+export type WorkoutHistory = WorkoutSession & { finishedAt: string };
+
 export type CreateSetInput = {
   exerciseId: string;
   setNumber: number;

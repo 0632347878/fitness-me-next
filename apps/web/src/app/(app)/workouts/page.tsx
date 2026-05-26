@@ -5,10 +5,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getWorkouts, startWorkout,
   type WorkoutSession,
+  type WorkoutHistory,
 } from "@/features/workouts/workouts.api";
 import { getExercises } from "@/features/exercises/exercises.api";
 import { T, Icon, FmBtn, FmPageLoader, FmEmpty, FmExercisePicker, AppHeader } from "@/components/fm";
 import { WorkoutHistoryCard } from "@/features/workouts/components/WorkoutHistoryCard";
+import { groupByWorkoutWindow } from "@/features/workouts/workouts.utils";
 import { SetLogger } from "@/features/workouts/components/SetLogger";
 import { useLang, useT } from "@/lib/lang-context";
 import { useSettings } from "@/lib/settings-context";
@@ -52,9 +54,9 @@ export default function WorkoutsPage() {
 
   if (isLoading) return <FmPageLoader />;
 
-  const ongoing = workouts.find((w) => !w.finishedAt);
-  const history = workouts
-    .filter((w) => !!w.finishedAt)
+  const ongoing: WorkoutSession | undefined = workouts.find((w) => !w.finishedAt);
+  const history: WorkoutHistory[] = workouts
+    .filter((w): w is WorkoutHistory => !!w.finishedAt)
     .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
 
   return (
@@ -117,7 +119,30 @@ export default function WorkoutsPage() {
               <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.textSub }}>{t.workouts.history}</span>
               <span style={{ fontSize: 11, color: T.textMuted }}>{history.length} {t.workouts.sessions}</span>
             </div>
-            {history.map((w) => <WorkoutHistoryCard key={w.id} session={w} />)}
+            {groupByWorkoutWindow(history).map(({ key, sessions: grouped }) => {
+              const validSessions = grouped.filter((w) => w.sets.length > 0);
+              if (!validSessions.length) return null;
+              const first = new Date(validSessions[0].startedAt);
+              const label = first.toLocaleDateString(lang === "ru" ? "ru-RU" : "en-US", {
+                weekday: "short", month: "short", day: "numeric",
+              });
+              const isMulti = validSessions.length > 1;
+              return (
+                <div key={key} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: T.textSub, letterSpacing: "0.08em" }}>{label}</span>
+                    {isMulti && (
+                      <span style={{ fontSize: 11, color: T.textMuted, background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 6, padding: "1px 6px" }}>
+                        {validSessions.length} {lang === "ru" ? "тренировки" : "sessions"}
+                      </span>
+                    )}
+                  </div>
+                  {validSessions.map((w) => (
+                    <WorkoutHistoryCard key={w.id} session={w} hideDate />
+                  ))}
+                </div>
+              );
+            })}
           </>
         ) : null}
       </div>

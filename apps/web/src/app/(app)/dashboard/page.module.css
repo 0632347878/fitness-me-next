@@ -1,0 +1,330 @@
+/* ─── Page ─────────────────────────────────────────────────────────────────── */
+.page {
+  background: var(--fm-bg);
+  min-height: 100%;
+  font-family: var(--font-dm-sans, sans-serif);
+}
+
+.header {
+  padding: 20px 20px 0;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerDate {
+  font-size: 12px;
+  color: var(--fm-text-sub);
+  margin-bottom: 2px;
+}
+
+.headerTitle {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 34px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: var(--fm-text-primary);
+  line-height: 1;
+}
+
+/* ─── Avatar button ────────────────────────────────────────────────────────── */
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--fm-accent) 0%, oklch(0.62 0.22 50) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px var(--fm-bg), 0 0 0 4px var(--fm-accent-mid);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.avatarLabel {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 17px;
+  font-weight: 800;
+  color: #0d0d12;
+}
+
+/* ─── Streak banner ────────────────────────────────────────────────────────── */
+.streak {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--fm-accent-dim);
+  border-radius: 12px;
+  border: 1px solid var(--fm-accent-mid);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.streakLabel {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fm-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.streakSub {
+  font-size: 12px;
+  color: var(--fm-text-sub);
+  margin-left: auto;
+}
+
+/* ─── Content ──────────────────────────────────────────────────────────────── */
+.content {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── Stat Cards ───────────────────────────────────────────────────────────── */
+.statRow {
+  display: flex;
+  gap: 8px;
+}
+
+.statCard {
+  background: var(--fm-bg-card);
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--fm-border);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statSub {
+  font-size: 10px;
+  font-family: var(--font-barlow-condensed, sans-serif), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fm-text-muted);
+}
+
+.statValue {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+    color: var(--fm-text-primary);
+  /*color: var(--fm-danger);*/
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 11px;
+  color: var(--fm-text-sub);
+  line-height: 1.3;
+}
+
+/* ─── Weekly chart ─────────────────────────────────────────────────────────── */
+.chart {
+  background: var(--fm-bg-card);
+  border-radius: 14px;
+  padding: 16px 16px 12px;
+  border: 1px solid var(--fm-border);
+}
+
+.chartTop {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.chartTitle {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--fm-text-sub);
+}
+
+.chartTotal {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fm-accent);
+}
+
+.chartBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 60px;
+}
+
+.chartBarCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.chartBarTrack {
+  width: 100%;
+  height: 52px;
+  display: flex;
+  align-items: flex-end;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.chartBarDay {
+  font-size: 10px;
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--fm-text-muted);
+}
+
+.chartBarDayToday {
+  color: var(--fm-accent);
+}
+
+/* ─── Recent workouts ──────────────────────────────────────────────────────── */
+.recentHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.recentLabel {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fm-text-sub);
+}
+
+.recentLink {
+  color: var(--fm-accent);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.recentList {
+  background: var(--fm-bg-card);
+  border-radius: 14px;
+  padding: 0 14px;
+  border: 1px solid var(--fm-border);
+}
+
+.recentEmpty {
+  background: var(--fm-bg-card);
+  border-radius: 14px;
+  padding: 24px 14px;
+  border: 1px solid var(--fm-border);
+  text-align: center;
+}
+
+.recentEmptyText {
+  font-size: 13px;
+  color: var(--fm-text-sub);
+}
+
+/* ─── Workout row ──────────────────────────────────────────────────────────── */
+.workoutRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--fm-border-light);
+}
+
+.workoutRow:last-child {
+  border-bottom: none;
+}
+
+.workoutIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.workoutMeta {
+  flex: 1;
+  min-width: 0;
+}
+
+.workoutDateRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.workoutDate {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fm-text-primary);
+}
+
+.workoutDur {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--fm-text-muted);
+}
+
+.workoutBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.workoutMore {
+  font-size: 10px;
+  color: var(--fm-text-muted);
+  align-self: center;
+}
+
+.workoutSets {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.workoutSetsCount {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--fm-text-primary);
+}
+
+.workoutSetsSub {
+  font-size: 10px;
+  color: var(--fm-text-muted);
+}
+
+/* ─── CTA ──────────────────────────────────────────────────────────────────── */
+.cta {
+  text-decoration: none;
+}
+

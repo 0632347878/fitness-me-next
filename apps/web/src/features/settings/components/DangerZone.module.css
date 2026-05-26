@@ -1,0 +1,72 @@
+.dangerBox {
+  background: var(--fm-bg);
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--fm-danger) 13%, transparent);
+}
+
+.dangerTitle {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fm-text-primary);
+  margin-bottom: 6px;
+}
+
+.dangerDesc {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 13px;
+  color: var(--fm-text-sub);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+/* ─── Done state ───────────────────────────────────────────────────────────── */
+.doneMsg {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: oklch(0.70 0.14 150 / 0.12);
+  border: 1px solid oklch(0.70 0.14 150 / 0.3);
+  color: var(--fm-success);
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+/* ─── Confirm state ────────────────────────────────────────────────────────── */
+.confirmBox {
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--fm-danger) 27%, transparent);
+  background: color-mix(in srgb, var(--fm-danger) 7%, transparent);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirmTitle {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--fm-danger);
+  letter-spacing: 0.04em;
+}
+
+.confirmDesc {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 12px;
+  color: var(--fm-text-sub);
+  line-height: 1.5;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+

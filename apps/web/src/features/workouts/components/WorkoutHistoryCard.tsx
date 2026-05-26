@@ -5,7 +5,8 @@ import { format } from "date-fns";
 import { T, CAT_COLOR, Icon, FmBadge } from "@/components/fm";
 import { useLang } from "@/lib/lang-context";
 import type { WorkoutSession } from "../workouts.api";
-import { groupSetsByExercise, calcDurationMinutes, type ExerciseGroup } from "../workouts.utils";
+import { groupSetsByExercise, calcDurationMinutes } from "../workouts.utils";
+import { ExerciseGroupBlock } from "./ExerciseGroupBlock";
 import styles from "./WorkoutHistoryCard.module.css";
 
 
@@ -13,9 +14,11 @@ import styles from "./WorkoutHistoryCard.module.css";
 
 interface WorkoutHistoryCardProps {
   session: WorkoutSession;
+  /** When true the date label is hidden — used when a parent already shows the day header */
+  hideDate?: boolean;
 }
 
-export function WorkoutHistoryCard({ session }: WorkoutHistoryCardProps) {
+export function WorkoutHistoryCard({ session, hideDate = false }: WorkoutHistoryCardProps) {
   const { lang } = useLang();
   const [expanded, setExpanded] = useState(false);
 
@@ -35,9 +38,11 @@ export function WorkoutHistoryCard({ session }: WorkoutHistoryCardProps) {
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className={styles.titleRow}>
-            <span className={styles.dateLabel}>
-              {format(new Date(session.startedAt), "EEE, MMM d")}
-            </span>
+            {!hideDate && (
+              <span className={styles.dateLabel}>
+                {format(new Date(session.startedAt), "EEE, MMM d")}
+              </span>
+            )}
             {duration != null && (
               <span className={styles.durationLabel}>
                 <Icon.Timer s={11} c={T.textMuted} />
@@ -79,40 +84,6 @@ export function WorkoutHistoryCard({ session }: WorkoutHistoryCardProps) {
           ))}
         </div>
       )}
-    </div>
-  );
-}
-
-// ─── Exercise group block ──────────────────────────────────────────────────────
-
-function ExerciseGroupBlock({ group, lang }: { group: ExerciseGroup; lang: string }) {
-  const catColor = CAT_COLOR[group.category] ?? T.accent;
-  const kgLabel = lang === "ru" ? "кг" : "kg";
-  const repsLabel = lang === "ru" ? "раз" : "reps";
-
-  return (
-    <div className={styles.exGroup}>
-      <div className={styles.exGroupHeader}>
-        {/* Dot color is dynamic per category */}
-        <div className={styles.exGroupDot} style={{ background: catColor }} />
-        <span className={styles.exGroupName} style={{ color: catColor }}>{group.exerciseName}</span>
-        <FmBadge cat={group.category} label={group.category} />
-      </div>
-
-      <div className={styles.setsList}>
-        {group.sets.map((set, idx) => (
-          <div key={set.id} className={styles.setRow}>
-            <span className={styles.setNum}>{idx + 1}</span>
-            <span className={styles.setWeight}>
-              {(set.weight ?? 0) > 0 ? `${set.weight} ${kgLabel}` : "BW"}
-            </span>
-            <div className={styles.setDivider} />
-            <span className={styles.setReps}>
-              {set.reps ?? "—"} {repsLabel}
-            </span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
