@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState } from "react";
 
-type Theme = "dark" | "light";
+type Theme = "light" | "dark";
 
 interface ThemeContextValue {
   theme: Theme;
