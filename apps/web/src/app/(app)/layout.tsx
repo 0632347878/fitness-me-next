@@ -27,6 +27,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const TABS = [
     { href: "/dashboard", label: t.nav.home,      IconComp: Icon.Home },
     { href: "/workouts",  label: t.nav.workouts,  IconComp: Icon.Dumbbell },
+    { href: "/programs",  label: lang === "ru" ? "Программы" : "Programs", IconComp: Icon.Chart },
     { href: "/exercises", label: t.nav.exercises, IconComp: Icon.Search },
     { href: "/metrics",   label: t.nav.metrics,   IconComp: Icon.Chart },
   ] as const;

@@ -109,3 +109,7 @@ input[type=number]::-webkit-outer-spin-button {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--fm-border); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--fm-text-muted); }
+
+.delimiter + .delimiter {
+  margin-top: 10px;
+}

@@ -56,6 +56,7 @@ export const translations = {
       allCategories: "All categories",
       allEquipment: "All equipment",
       muscleGroups: "Muscle groups",
+      difficulty: "Difficulty",
       equipment: "Equipment",
       instructions: "Instructions",
       previous: "Previous",

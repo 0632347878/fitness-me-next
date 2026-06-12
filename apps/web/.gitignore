@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# gifs (downloaded by scripts/download-gifs.mjs)
+/public/gifs/
+
 # production
 /build
 

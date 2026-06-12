@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { getExercises, getEquipmentList, type Exercise } from "@/features/exercises/exercises.api";
 import { T, CAT_COLOR, CAT_LABEL, FmBadge, FmBtn, FmPageLoader, AppHeader, Icon, FmStyles } from "@/components/fm";
@@ -34,9 +35,17 @@ function MuscleChip({ label }: { label: string }) {
   return <span className={s.chip}>{label}</span>;
 }
 
+// ─── Gif URL builder ─────────────────────────────────────────────────────────
+function gifUrl(src: string | null): string | null {
+  if (!src) return null;
+  if (src.startsWith("/")) return src; // already local → serve directly
+  return `/api/gif?url=${encodeURIComponent(src)}`; // remote → proxy
+}
+
 // ─── Exercise card ────────────────────────────────────────────────────────────
 function ExerciseCard({ ex, lang, onClick }: { ex: Exercise; lang: string; onClick: () => void }) {
   const displayName = lang === "ru" ? (ex.nameRu ?? ex.name) : ex.name;
+  const gif = gifUrl(ex.gifUrl);
   return (
     <button className={s.card} onClick={onClick}>
       <div className={s.cardTop}>
@@ -51,6 +60,17 @@ function ExerciseCard({ ex, lang, onClick }: { ex: Exercise; lang: string; onCli
       </div>
       {ex.equipment && (
         <span className={s.cardEquipment}>🏋️ {ex.equipment}</span>
+      )}
+      {gif && (
+        <Image
+          className={s.cardGif}
+          src={gif}
+          alt={displayName}
+          width={300}
+          height={160}
+          unoptimized
+          onError={() => console.warn("[gif] failed to load:", ex.gifUrl)}
+        />
       )}
     </button>
   );
@@ -85,23 +105,23 @@ function ExerciseDetail({ ex, lang, onClose }: { ex: Exercise; lang: string; onC
         <div className={s.panelBody}>
           {/* Muscles */}
           <div>
-            <p className={s.sectionLabel}>{t.exercises.muscleGroups}</p>
-            <div className={s.musclesList}>
-              {ex.muscleGroups.map((m) => (
-                <span
-                  key={m}
-                  style={{
-                    padding: "5px 12px", borderRadius: 100,
-                    fontSize: 12, fontWeight: 600,
-                    fontFamily: "var(--font-barlow-condensed, sans-serif)",
-                    letterSpacing: "0.06em", textTransform: "uppercase",
-                    background: catColor + "15", color: catColor,
-                    border: `1px solid ${catColor}30`,
-                  }}
-                >
+            <div className="delimiter">
+              <p className={s.sectionLabel}>{t.exercises.muscleGroups}</p>
+              <div className={s.musclesList}>
+                {ex.muscleGroups.map((m) => (
+                    <span
+                        key={m}
+                        className={s.muscleTag}
+                        style={{ "--cat-color": catColor } as React.CSSProperties}
+                    >
                   {m}
                 </span>
-              ))}
+                ))}
+              </div>
+            </div>
+            <div className="delimiter">
+              <p className={s.sectionLabel}>{t.exercises.difficulty}</p>
+              <span style={{ "--cat-color": catColor } as React.CSSProperties} className={s.muscleTag}>{ex.difficulty}</span>
             </div>
           </div>
           {/* Instructions */}
