@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { format } from "date-fns";
 import { T, CAT_COLOR, Icon, FmBadge } from "@/components/fm";
 import { useLang } from "@/lib/lang-context";
@@ -32,11 +32,11 @@ export function WorkoutHistoryCard({ session, hideDate = false }: WorkoutHistory
     <div className={styles.card}>
       <div className={styles.cardHeader} onClick={() => setExpanded((v) => !v)}>
         {/* Icon — background color is dynamic per category */}
-        <div className={styles.iconWrap} style={{ background: accentColor + "15" }}>
+        <div className={styles.iconWrap} style={{ "--accent-color": accentColor } as CSSProperties}>
           <Icon.Dumbbell s={17} c={accentColor} />
         </div>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className={styles.infoCol}>
           <div className={styles.titleRow}>
             {!hideDate && (
               <span className={styles.dateLabel}>

@@ -1,0 +1,423 @@
+.page {
+  background: var(--fm-bg);
+  color: var(--fm-text-primary);
+  min-height: 100%;
+}
+
+/* ─── Nav ─────────────────────────────────────────────────────────────────── */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 24px;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.logo {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.navCta {
+  padding: 9px 18px;
+  border-radius: 10px;
+  border: 1.5px solid var(--fm-border);
+  background: transparent;
+  color: var(--fm-text-primary);
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* ─── Hero ────────────────────────────────────────────────────────────────── */
+.hero {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 56px 24px 40px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+}
+.heroBadge {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fm-accent-raw);
+  background: var(--fm-accent-dim);
+  padding: 6px 14px;
+  border-radius: 100px;
+}
+.heroTitle {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: clamp(38px, 7vw, 64px);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.heroSubtitle {
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--fm-text-sub);
+  max-width: 540px;
+}
+.heroCtaRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 6px;
+}
+.heroPrimaryCta {
+  padding: 15px 28px;
+  border-radius: 12px;
+  border: none;
+  background: var(--fm-accent);
+  color: #0d0d12;
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.heroSecondaryCta {
+  padding: 15px 24px;
+  border-radius: 12px;
+  border: 1.5px solid var(--fm-border);
+  background: transparent;
+  color: var(--fm-text-primary);
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* ─── SetLogTicker ────────────────────────────────────────────────────────── */
+.ticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--fm-bg-card);
+  border: 1px solid var(--fm-border);
+  border-radius: 14px;
+  padding: 14px 20px;
+}
+.tickerCountLabel {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--fm-text-muted);
+  text-transform: uppercase;
+}
+.tickerCount {
+  display: block;
+  font-size: 22px;
+  color: var(--fm-accent);
+  animation: rw-flip 0.4s ease;
+}
+.tickerDivider {
+  width: 1px;
+  height: 34px;
+  background: var(--fm-border);
+}
+.tickerEx {
+  animation: rw-flip 0.4s ease;
+  min-width: 168px;
+}
+.tickerExName {
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+  font-size: 15px;
+  color: var(--fm-text-primary);
+  font-weight: 500;
+}
+.tickerExMeta {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--fm-text-sub);
+}
+.tickerExMeta .dot { color: var(--fm-accent-raw); }
+
+/* ─── Roadmap ─────────────────────────────────────────────────────────────── */
+.roadmapWrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 24px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+.roadmapCaption {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fm-text-muted);
+}
+.roadmapStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.roadmapPill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border-radius: 100px;
+  border: 1.5px solid var(--fm-border);
+  background: transparent;
+}
+.roadmapPill[data-status="done"] {
+  border-color: var(--fm-success);
+  background: color-mix(in srgb, var(--fm-success) 10%, transparent);
+}
+.roadmapPill[data-status="next"] {
+  border-color: var(--fm-accent-raw);
+  background: color-mix(in srgb, var(--fm-accent-raw) 10%, transparent);
+}
+.roadmapDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fm-text-muted);
+  flex-shrink: 0;
+}
+.roadmapPill[data-status="done"] .roadmapDot { background: var(--fm-success); }
+.roadmapPill[data-status="next"] .roadmapDot { background: var(--fm-accent-raw); }
+.roadmapLabel {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--fm-text-muted);
+}
+.roadmapPill:not([data-status="later"]) .roadmapLabel { color: var(--fm-text-primary); }
+
+/* ─── Features ────────────────────────────────────────────────────────────── */
+.featuresGrid {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+.featureCard {
+  background: var(--fm-bg-card);
+  border: 1px solid var(--fm-border);
+  border-radius: 16px;
+  padding: 24px 22px;
+}
+.featureTitle {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--fm-text-primary);
+  margin-bottom: 8px;
+}
+.featureBody {
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--fm-text-sub);
+}
+
+/* ─── Pricing ─────────────────────────────────────────────────────────────── */
+.pricingWrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+.pricingTitle {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: 28px;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.pricingSubtitle {
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+  font-size: 14px;
+  color: var(--fm-text-sub);
+  text-align: center;
+  margin-bottom: 28px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.pricingRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.priceCard {
+  flex: 1 1 260px;
+  background: var(--fm-bg-card);
+  border: 1.5px solid var(--fm-border);
+  border-radius: 18px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.priceCard.highlight {
+  background: var(--fm-accent-dim);
+  border-color: var(--fm-accent-raw);
+}
+.priceEyebrow {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fm-text-sub);
+}
+.priceCard.highlight .priceEyebrow { color: var(--fm-accent-raw); }
+.priceAmount {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: 44px;
+  font-weight: 900;
+  color: var(--fm-text-primary);
+}
+.priceCadence {
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+  font-size: 14px;
+  color: var(--fm-text-sub);
+  margin-left: 6px;
+}
+.priceFeatureList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+}
+.priceFeatureItem {
+  display: flex;
+  gap: 8px;
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+  font-size: 13.5px;
+  color: var(--fm-text-sub);
+}
+.priceCheck {
+  color: var(--fm-success);
+  flex-shrink: 0;
+}
+.priceCta {
+  margin-top: auto;
+  padding: 13px 20px;
+  border-radius: 10px;
+  border: none;
+  background: var(--fm-bg-input);
+  color: var(--fm-text-primary);
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.priceCard.highlight .priceCta {
+  background: var(--fm-accent);
+  color: #0d0d12;
+}
+
+/* ─── Waitlist ────────────────────────────────────────────────────────────── */
+.waitlistWrap {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+.waitlistTitle {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: 24px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.waitlistDone {
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+  font-size: 15px;
+  color: var(--fm-success);
+  text-align: center;
+}
+.waitlistForm {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  flex-wrap: wrap;
+}
+.waitlistInput {
+  flex: 1 1 220px;
+  background: var(--fm-bg-input);
+  border: 1.5px solid var(--fm-border);
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-size: 14px;
+  color: var(--fm-text-primary);
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+  outline: none;
+}
+.waitlistInput.error { border-color: var(--fm-danger); }
+.waitlistBtn {
+  padding: 13px 22px;
+  border-radius: 10px;
+  border: none;
+  background: var(--fm-accent);
+  color: #0d0d12;
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.waitlistBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.waitlistError {
+  width: 100%;
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+  font-size: 12px;
+  color: var(--fm-danger);
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--fm-border-light);
+  padding: 24px;
+  text-align: center;
+}
+.footerText {
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+  font-size: 12.5px;
+  color: var(--fm-text-muted);
+}

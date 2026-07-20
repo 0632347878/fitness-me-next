@@ -249,6 +249,9 @@
   text-transform: uppercase;
   color: var(--fm-text-muted);
 }
+.historyHeadCell.date  { flex: 1.2; }
+.historyHeadCell.val   { flex: 1; }
+.historyHeadCell.notes { flex: 1.5; }
 
 .historyRow {
   display: flex;
@@ -273,7 +276,11 @@
   font-size: 16px;
   font-weight: 800;
   flex: 1;
+  color: var(--fm-text-muted);
 }
+.historyVal.weight     { color: var(--fm-accent); }
+.historyVal.bodyFat    { color: var(--fm-mobility); }
+.historyVal.muscleMass { color: var(--fm-flexibility); }
 
 .historyNotes {
   font-family: var(--font-dm-sans, sans-serif);

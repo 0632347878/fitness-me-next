@@ -1,0 +1,68 @@
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding-top: 8px;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+.heroText {
+  text-align: center;
+}
+/* spacer = "Step 1 of 2" line height on register, prevents layout jump on page switch */
+.heroSpacer {
+  height: 22px;
+}
+.heroTitle {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 40px;
+  font-weight: 900;
+  color: #f0ede8;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  margin: 0;
+}
+.heroBody {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 14px;
+  color: #8a8898;
+  margin-top: 6px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.apiError {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #ef4444;
+  font-family: var(--font-dm-sans, sans-serif);
+}
+
+.footer {
+  text-align: center;
+  padding-top: 16px;
+}
+.footerText {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 13px;
+  color: #8a8898;
+}
+.footerLink {
+  color: oklch(0.72 0.18 35);
+  font-weight: 600;
+  text-decoration: none;
+}

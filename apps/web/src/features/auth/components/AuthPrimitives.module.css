@@ -1,0 +1,134 @@
+/* Auth screens are always-dark by design (independent of the app's light/dark theme toggle),
+   so these use literal colors rather than the --fm-* theme tokens. */
+
+.logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.logoIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: oklch(0.72 0.18 35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: #0d0d12;
+  font-weight: 900;
+}
+.logoText {
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f0ede8;
+}
+
+/* ─── FInput ──────────────────────────────────────────────────────────────── */
+.fieldWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.label {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a8898;
+}
+.inputWrap {
+  position: relative;
+}
+.input {
+  width: 100%;
+  background: #1e1e2a;
+  border: 1.5px solid #3e3e52;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 15px;
+  color: #f0ede8;
+  font-family: var(--font-dm-sans, "DM Sans", sans-serif);
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.input.password { padding: 14px 44px 14px 14px; }
+.input.error { border-color: #ef4444; }
+.input:focus { border-color: oklch(0.72 0.18 35); }
+
+.toggleVisibility {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #8a8898;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+}
+
+.errorText {
+  font-size: 11px;
+  color: #ef4444;
+  font-family: var(--font-dm-sans, sans-serif);
+  min-height: 16px;
+}
+
+/* ─── FButton ─────────────────────────────────────────────────────────────── */
+.btn {
+  width: 100%;
+  padding: 15px 20px;
+  border-radius: 12px;
+  background: oklch(0.72 0.18 35);
+  color: #0d0d12;
+  border: none;
+  font-family: var(--font-barlow-condensed, "Barlow Condensed", sans-serif);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.btn:disabled { cursor: not-allowed; opacity: 0.45; }
+.btn:not(:disabled) { cursor: pointer; }
+.btn:not(:disabled):active { transform: scale(0.98); }
+
+.btnLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btnSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #0d0d12;
+  border-top-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: fm-spin 0.7s linear infinite;
+}
+
+/* ─── GhostButton ─────────────────────────────────────────────────────────── */
+.ghostBtn {
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: 12px;
+  background: transparent;
+  border: 1.5px solid #3e3e52;
+  color: #8a8898;
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.ghostBtn:hover { border-color: #5a5a6a; }

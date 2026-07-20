@@ -3,10 +3,12 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { Icon, T, FmStyles } from "@/components/fm";
+import clsx from "clsx";
+import { Icon, FmStyles } from "@/components/fm";
 import { useLang, useT } from "@/lib/lang-context";
 import { SettingsProvider, useSettings } from "@/lib/settings-context";
 import { AccountPopup } from "@/features/settings";
+import s from "./layout.module.css";
 
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -44,117 +46,33 @@ function AppShell({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   return (
-    <div
-      style={{
-        minHeight: "100dvh",
-        display: "flex",
-        flexDirection: "column",
-        background: T.bg,
-        fontFamily: "var(--font-dm-sans, sans-serif)",
-      }}
-    >
+    <div className={s.shell}>
       <FmStyles />
 
       <AccountPopup onLogout={handleLogout} />
 
       {/* Page content */}
-      <main style={{ flex: 1, overflowY: "auto", paddingBottom: 64 }}>
+      <main className={s.main}>
         {children}
       </main>
 
       {/* Bottom Tab Bar */}
-      <nav
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 64,
-          background: T.bgCard,
-          borderTop: `1px solid ${T.border}`,
-          display: "flex",
-          alignItems: "stretch",
-          zIndex: 100,
-        }}
-      >
+      <nav className={s.tabBar}>
         {TABS.map(({ href, label, IconComp }) => {
           const isActive = pathname.startsWith(href);
           return (
-            <Link
-              key={href}
-              href={href}
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 3,
-                textDecoration: "none",
-                color: isActive ? T.accentRaw : T.textMuted,
-                position: "relative",
-                transition: "color 0.15s",
-              }}
-            >
-              {isActive && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: 32,
-                    height: 2,
-                    borderRadius: 2,
-                    background: T.accent,
-                  }}
-                />
-              )}
-              <IconComp s={20} c={isActive ? T.accentRaw : T.textMuted} />
-              <span
-                style={{
-                  fontSize: 10,
-                  fontFamily: "var(--font-barlow-condensed, sans-serif)",
-                  fontWeight: 700,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {label}
-              </span>
+            <Link key={href} href={href} className={clsx(s.tab, isActive && s.active)}>
+              {isActive && <span className={s.tabIndicator} />}
+              <IconComp s={20} c="currentColor" />
+              <span className={s.tabLabel}>{label}</span>
             </Link>
           );
         })}
 
         {/* Account button */}
-        <button
-          onClick={openSettings}
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 3,
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: T.textMuted,
-            transition: "color 0.15s",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = T.accentRaw)}
-          onMouseLeave={(e) => (e.currentTarget.style.color = T.textMuted)}
-        >
+        <button onClick={openSettings} className={clsx(s.tab, s.accountTab)}>
           <Icon.User s={20} c="currentColor" />
-          <span
-            style={{
-              fontSize: 10,
-              fontFamily: "var(--font-barlow-condensed, sans-serif)",
-              fontWeight: 700,
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-            }}
-          >
+          <span className={s.tabLabel}>
             {lang === "ru" ? "Аккаунт" : "Account"}
           </span>
         </button>

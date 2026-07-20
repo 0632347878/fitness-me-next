@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import clsx from "clsx";
 import { useRouter } from "next/navigation";
-import { T, FmBtn, FmPageLoader } from "@/components/fm";
+import { FmBtn, FmPageLoader } from "@/components/fm";
 import {
   usePrograms,
   useRecommendedPrograms,
@@ -11,6 +12,7 @@ import {
 } from "../hooks/usePrograms";
 import { ProgramCard } from "./ProgramCard";
 import type { ExperienceLevel } from "../programs.api";
+import s from "./ProgramsPage.module.css";
 
 const LEVELS: { value: ExperienceLevel; label: string }[] = [
   { value: "BEGINNER", label: "Beginner" },
@@ -56,31 +58,26 @@ export function ProgramsPage() {
   const savingId = assign.isPending ? assign.variables : null;
 
   return (
-    <div style={{ padding: "24px 16px", maxWidth: 680, margin: "0 auto", paddingBottom: justSavedId ? 100 : 24 }}>
+    <div className={clsx(s.page, justSavedId && s.savedPrompt)}>
       {/* Header */}
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontFamily: "var(--font-barlow-condensed)", fontSize: 30, fontWeight: 900, textTransform: "uppercase", color: T.textPrimary, margin: 0 }}>
+      <div className={s.header}>
+        <h1 className={s.title}>
           Training Programs
         </h1>
-        <p style={{ fontSize: 13, color: T.textSub, marginTop: 6 }}>
+        <p className={s.subtitle}>
           {myProgram
-            ? <>Current: <span style={{ color: T.accent, fontWeight: 600 }}>{myProgram.shortName}</span></>
+            ? <>Current: <span className={s.current}>{myProgram.shortName}</span></>
             : "Choose a program to start training"}
         </p>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+      <div className={s.tabRow}>
         {(["recommended", "all"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            style={{
-              padding: "8px 18px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600,
-              background: tab === t ? T.accent : T.bgInput,
-              color: tab === t ? "#0d0d12" : T.textSub,
-              transition: "background 0.15s",
-            }}
+            className={clsx(s.pillBtn, tab === t && s.active)}
           >
             {t === "recommended" ? "For me" : "All programs"}
           </button>
@@ -89,7 +86,7 @@ export function ProgramsPage() {
 
       {/* "All" tab — level filter */}
       {tab === "all" && (
-        <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        <div className={s.filterRow}>
           <Chip active={allLevel === "ALL"} onClick={() => setAllLevel("ALL")}>All levels</Chip>
           {LEVELS.map((l) => (
             <Chip key={l.value} active={allLevel === l.value} onClick={() => setAllLevel(l.value)}>
@@ -101,10 +98,10 @@ export function ProgramsPage() {
 
       {/* "Recommended" tab — profile filters */}
       {tab === "recommended" && (
-        <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 14, padding: 16, marginBottom: 20, display: "flex", flexDirection: "column", gap: 14 }}>
+        <div className={s.filterPanel}>
           <div>
             <Label>Your level</Label>
-            <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+            <div className={s.filterGroupRow}>
               {LEVELS.map((l) => (
                 <Chip key={l.value} active={level === l.value} onClick={() => setLevel(l.value)}>{l.label}</Chip>
               ))}
@@ -112,7 +109,7 @@ export function ProgramsPage() {
           </div>
           <div>
             <Label>Days per week</Label>
-            <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+            <div className={s.filterGroupRow}>
               {DAYS_OPTIONS.map((d) => (
                 <Chip key={d} active={days === d} onClick={() => setDays(d)}>{d}×</Chip>
               ))}
@@ -124,11 +121,7 @@ export function ProgramsPage() {
               value={sport}
               onChange={(e) => setSport(e.target.value)}
               placeholder="ski, snowboard, kite…"
-              style={{
-                marginTop: 6, width: "100%", padding: "8px 12px", borderRadius: 10,
-                border: `1px solid ${T.border}`, background: T.bgInput, color: T.textPrimary, fontSize: 13,
-                outline: "none", boxSizing: "border-box",
-              }}
+              className={s.sportInput}
             />
           </div>
         </div>
@@ -138,7 +131,7 @@ export function ProgramsPage() {
       {isLoading ? (
         <FmPageLoader />
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div className={s.list}>
           {programs?.map((p) => (
             <ProgramCard
               key={p.id}
@@ -150,7 +143,7 @@ export function ProgramsPage() {
             />
           ))}
           {programs?.length === 0 && (
-            <p style={{ color: T.textMuted, textAlign: "center", padding: "40px 0" }}>
+            <p className={s.emptyMsg}>
               No programs found
             </p>
           )}
@@ -159,13 +152,8 @@ export function ProgramsPage() {
 
       {/* Saved → prompt to generate plan */}
       {justSavedId && (
-        <div style={{
-          position: "fixed", bottom: 72, left: "50%", transform: "translateX(-50%)",
-          background: T.bgCard, border: `1px solid ${T.accent}`,
-          borderRadius: 16, padding: "14px 18px", display: "flex", alignItems: "center", gap: 14,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.4)", zIndex: 50, width: "calc(100% - 32px)", maxWidth: 480,
-        }}>
-          <span style={{ fontSize: 13, color: T.textPrimary, fontWeight: 600, flex: 1 }}>
+        <div className={s.savedToast}>
+          <span className={s.savedToastText}>
             ✓ Program saved. Generate your plan?
           </span>
           <FmBtn size="sm" onClick={() => router.push("/dashboard")}>
@@ -179,7 +167,7 @@ export function ProgramsPage() {
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <span style={{ fontSize: 11, fontWeight: 700, color: T.textMuted, textTransform: "uppercase", letterSpacing: 0.8 }}>
+    <span className={s.label}>
       {children}
     </span>
   );
@@ -187,15 +175,7 @@ function Label({ children }: { children: React.ReactNode }) {
 
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: "6px 14px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600,
-        background: active ? T.accent : T.bgInput,
-        color: active ? "#0d0d12" : T.textSub,
-        transition: "background 0.15s",
-      }}
-    >
+    <button onClick={onClick} className={clsx(s.chip, active && s.active)}>
       {children}
     </button>
   );

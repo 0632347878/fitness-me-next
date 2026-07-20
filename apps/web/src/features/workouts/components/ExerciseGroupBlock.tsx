@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { T, CAT_COLOR, FmBadge } from "@/components/fm";
 import type { ExerciseGroup } from "../workouts.utils";
 import styles from "./ExerciseGroupBlock.module.css";
@@ -16,9 +17,9 @@ export function ExerciseGroupBlock({ group, lang }: ExerciseGroupBlockProps) {
 
   return (
     <div className={styles.exGroup}>
-      <div className={styles.exGroupHeader}>
-        <div className={styles.exGroupDot} style={{ background: catColor }} />
-        <span className={styles.exGroupName} style={{ color: catColor }}>
+      <div className={styles.exGroupHeader} style={{ "--cat-color": catColor } as CSSProperties}>
+        <div className={styles.exGroupDot} />
+        <span className={styles.exGroupName}>
           {group.exerciseName}
         </span>
         <FmBadge cat={group.category} label={group.category} />

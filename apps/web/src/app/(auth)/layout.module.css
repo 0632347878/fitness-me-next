@@ -1,0 +1,108 @@
+.page {
+  background: #0d0d12;
+}
+
+.brandPanel {
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 52px;
+  background: #16161f;
+  border-right: 1px solid #2a2a38;
+  position: relative;
+  overflow: hidden;
+}
+
+.dotGrid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image: radial-gradient(circle, #8a8898 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+
+.brandLogo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brandLogoIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: oklch(0.72 0.18 35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0d0d12;
+  font-size: 20px;
+}
+
+.brandLogoText {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f0ede8;
+}
+
+.tagline {
+  position: relative;
+}
+
+.taglineHeading {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 56px;
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 1.0;
+  color: #f0ede8;
+  margin: 0;
+}
+
+.taglineBody {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 14px;
+  color: #8a8898;
+  margin-top: 16px;
+  max-width: 260px;
+  line-height: 1.6;
+}
+
+.socialProof {
+  position: relative;
+}
+
+.socialPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: #1e1e2a;
+  border: 1px solid #2a2a38;
+}
+
+.socialDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: oklch(0.72 0.18 35);
+  display: inline-block;
+}
+
+.socialText {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 12px;
+  color: #8a8898;
+}
+
+.formPanel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: 36px 24px 28px;
+}

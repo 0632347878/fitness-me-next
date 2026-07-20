@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { type CSSProperties } from "react";
+import clsx from "clsx";
 import { T } from "@/components/fm";
 import type { ProgramTemplate, ScienceLevel } from "../programs.api";
+import s from "./ProgramCard.module.css";
 
 const SCIENCE_LABEL: Record<ScienceLevel, string> = {
   STRONG: "Strong evidence",
@@ -49,82 +51,65 @@ export function ProgramCard({ program: p, isCurrent, isSaving, locked, onChoose,
   const isLocked = !!locked && !isCurrent;
 
   return (
-    <div
-      style={{
-        background: T.bgCard,
-        border: `2px solid ${isCurrent ? T.accent : T.border}`,
-        borderRadius: 16,
-        padding: "20px",
-        transition: "border-color 0.15s, box-shadow 0.15s",
-        boxShadow: isCurrent ? `0 0 0 3px ${T.accentDim}` : "none",
-        display: "flex",
-        flexDirection: "column",
-        gap: 14,
-      }}
-    >
+    <div className={clsx(s.card, isCurrent && s.current)}>
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ fontFamily: "var(--font-barlow-condensed)", fontSize: 20, fontWeight: 700, color: T.textPrimary, textTransform: "uppercase", letterSpacing: 0.5 }}>
+      <div className={s.header}>
+        <div className={s.headerLeft}>
+          <div className={s.titleRow}>
+            <span className={s.name}>
               {p.shortName}
             </span>
             {isCurrent && (
-              <span style={{ fontSize: 11, background: T.accent, color: "#0d0d12", padding: "2px 8px", borderRadius: 20, fontWeight: 700 }}>
+              <span className={clsx(s.pill, s.pillCurrent)}>
                 Current
               </span>
             )}
             {isLocked && (
-              <span style={{ fontSize: 11, background: T.bgInput, color: T.textMuted, padding: "2px 8px", borderRadius: 20, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 4 }}>
+              <span className={clsx(s.pill, s.pillLocked)}>
                 🔒 Pro
               </span>
             )}
             {!isCurrent && showScore && p._score !== undefined && p._score > 0 && (
-              <span style={{ fontSize: 11, background: T.accentDim, color: T.accent, padding: "2px 8px", borderRadius: 20, fontWeight: 600 }}>
+              <span className={clsx(s.pill, s.pillMatch)}>
                 Match {p._score}
               </span>
             )}
           </div>
-          <p style={{ fontSize: 13, color: T.textSub, margin: "4px 0 0", lineHeight: 1.4 }}>
+          <p className={s.byline}>
             {p.author ? `by ${p.author}` : STRUCTURE_LABEL[p.structure]}
           </p>
         </div>
 
-        <span style={{
-          fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 20,
-          background: LEVEL_COLOR[p.minLevel] + "20",
-          color: LEVEL_COLOR[p.minLevel],
-          whiteSpace: "nowrap",
-        }}>
+        <span className={s.levelBadge} style={{ "--level-color": LEVEL_COLOR[p.minLevel] } as CSSProperties}>
           {LEVEL_LABEL[p.minLevel]}
         </span>
       </div>
 
-      <p style={{ fontSize: 13, color: T.textSub, lineHeight: 1.5, margin: 0 }}>
+      <p className={s.description}>
         {p.description}
       </p>
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <div className={s.tagRow}>
         <Tag label={`${p.daysPerWeek.join(" / ")} d/week`} />
         <Tag label={STRUCTURE_LABEL[p.structure]} />
         <Tag label={SCIENCE_LABEL[p.scienceBacking]} color={SCIENCE_COLOR[p.scienceBacking]} />
       </div>
 
       {/* Pros / Cons */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className={s.prosConsGrid}>
         <div>
           <SectionTitle label="Pros" color="oklch(0.65 0.18 155)" />
-          <ul style={{ margin: "6px 0 0", padding: "0 0 0 16px" }}>
+          <ul className={s.list}>
             {p.pros.slice(0, 4).map((pro, i) => (
-              <li key={i} style={{ fontSize: 12, color: T.textSub, marginBottom: 2 }}>{pro}</li>
+              <li key={i}>{pro}</li>
             ))}
           </ul>
         </div>
         <div>
           <SectionTitle label="Cons" color="oklch(0.62 0.18 20)" />
-          <ul style={{ margin: "6px 0 0", padding: "0 0 0 16px" }}>
+          <ul className={s.list}>
             {p.cons.slice(0, 4).map((con, i) => (
-              <li key={i} style={{ fontSize: 12, color: T.textSub, marginBottom: 2 }}>{con}</li>
+              <li key={i}>{con}</li>
             ))}
           </ul>
         </div>
@@ -133,9 +118,9 @@ export function ProgramCard({ program: p, isCurrent, isSaving, locked, onChoose,
       {/* Best for */}
       <div>
         <SectionTitle label="Best for" color={T.accent} />
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+        <div className={s.bestForRow}>
           {p.bestFor.map((b, i) => (
-            <span key={i} style={{ fontSize: 11, background: T.bgInput, color: T.textSub, padding: "3px 10px", borderRadius: 20 }}>{b}</span>
+            <span key={i} className={s.bestForPill}>{b}</span>
           ))}
         </div>
       </div>
@@ -145,41 +130,15 @@ export function ProgramCard({ program: p, isCurrent, isSaving, locked, onChoose,
         // Gated: visible but inactive — transparent grey. Tap → future paywall.
         <button
           onClick={() => onLockedClick?.(p)}
-          style={{
-            marginTop: 4,
-            padding: "12px 0",
-            borderRadius: 10,
-            border: `1px solid ${T.border}`,
-            cursor: onLockedClick ? "pointer" : "default",
-            fontSize: 14,
-            fontWeight: 700,
-            background: "transparent",
-            color: T.textMuted,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            transition: "background 0.15s, color 0.15s, border-color 0.15s",
-          }}
+          className={clsx(s.actionBtn, s.locked, onLockedClick && s.clickable)}
         >
-          <span style={{ fontSize: 13 }}>🔒</span> Unlock program choice
+          <span className={s.lockIcon}>🔒</span> Unlock program choice
         </button>
       ) : (
         <button
           onClick={() => !isCurrent && !isSaving && onChoose(p.id)}
           disabled={isCurrent || isSaving}
-          style={{
-            marginTop: 4,
-            padding: "12px 0",
-            borderRadius: 10,
-            border: "none",
-            cursor: isCurrent ? "default" : isSaving ? "wait" : "pointer",
-            fontSize: 14,
-            fontWeight: 700,
-            background: isCurrent ? T.bgInput : T.accent,
-            color: isCurrent ? T.textMuted : "#0d0d12",
-            transition: "background 0.15s, color 0.15s",
-          }}
+          className={clsx(s.actionBtn, isCurrent && s.current, isSaving && s.saving)}
         >
           {isCurrent ? "✓ Your current program" : isSaving ? "Saving…" : "Choose this program"}
         </button>
@@ -191,10 +150,7 @@ export function ProgramCard({ program: p, isCurrent, isSaving, locked, onChoose,
 function Tag({ label, color }: { label: string; color?: string }) {
   const c = color ?? T.textMuted;
   return (
-    <span style={{
-      fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 20,
-      background: c + "18", color: c, border: `1px solid ${c}30`,
-    }}>
+    <span className={s.tag} style={{ "--tag-color": c } as CSSProperties}>
       {label}
     </span>
   );
@@ -202,7 +158,7 @@ function Tag({ label, color }: { label: string; color?: string }) {
 
 function SectionTitle({ label, color }: { label: string; color: string }) {
   return (
-    <span style={{ fontSize: 11, fontWeight: 700, color, textTransform: "uppercase", letterSpacing: 0.8 }}>
+    <span className={s.sectionTitle} style={{ "--tag-color": color } as CSSProperties}>
       {label}
     </span>
   );

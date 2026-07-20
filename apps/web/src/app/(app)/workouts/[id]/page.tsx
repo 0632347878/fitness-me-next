@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getWorkout, getWorkouts } from "@/features/workouts/workouts.api";
 import { SetLogger } from "@/features/workouts/components/SetLogger";
-import { FmPageLoader, AppHeader, T } from "@/components/fm";
+import { FmPageLoader, AppHeader } from "@/components/fm";
 import { useSettings } from "@/lib/settings-context";
 
 export default function WorkoutSessionPage() {
@@ -27,14 +27,14 @@ export default function WorkoutSessionPage() {
 
   if (!session) {
     return (
-      <div style={{ padding: "40px 16px", textAlign: "center", color: T.textSub }}>
+      <div className="py-10 px-4 text-center text-fm-text-sub">
         Workout not found.
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: "100dvh", background: T.bg }}>
+    <div className="min-h-dvh bg-fm-bg">
       <AppHeader
         title="Workout"
         onAccountClick={openSettings}

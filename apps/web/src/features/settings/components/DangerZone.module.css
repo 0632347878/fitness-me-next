@@ -70,3 +70,10 @@
   margin-top: 2px;
 }
 
+.confirmActions > button { flex: 1; }
+
+.dangerGhostBtn {
+  border-color: color-mix(in srgb, var(--fm-danger) 27%, transparent);
+  color: var(--fm-danger);
+}
+

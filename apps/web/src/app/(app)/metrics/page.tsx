@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import clsx from "clsx";
 import {
   ResponsiveContainer, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine,
@@ -63,13 +64,13 @@ function HistoryRow({ m }: { m: BodyMetric }) {
   return (
     <div className={s.historyRow}>
       <span className={s.historyDate}>{format(new Date(m.date), "MMM d, yyyy")}</span>
-      <span className={s.historyVal} style={{ color: m.weight != null ? T.accent : T.textMuted }}>
+      <span className={clsx(s.historyVal, m.weight != null && s.weight)}>
         {m.weight != null ? `${m.weight} kg` : "—"}
       </span>
-      <span className={s.historyVal} style={{ color: m.bodyFat != null ? T.mobility : T.textMuted }}>
+      <span className={clsx(s.historyVal, m.bodyFat != null && s.bodyFat)}>
         {m.bodyFat != null ? `${m.bodyFat}%` : "—"}
       </span>
-      <span className={s.historyVal} style={{ color: m.muscleMass != null ? T.flexibility : T.textMuted }}>
+      <span className={clsx(s.historyVal, m.muscleMass != null && s.muscleMass)}>
         {m.muscleMass != null ? `${m.muscleMass} kg` : "—"}
       </span>
       <span className={s.historyNotes}>{m.notes ?? "—"}</span>
@@ -216,7 +217,7 @@ export default function MetricsPage() {
                 <DarkInput label={t.metrics.notes} value={notes} onChange={setNotes} placeholder={t.metrics.optional} />
               </div>
               <div className={s.formActions}>
-                <FmBtn loading={isPending} disabled={!weight && !bodyFat} onClick={() => log()} style={{ flex: 1 }}>
+                <FmBtn loading={isPending} disabled={!weight && !bodyFat} onClick={() => log()} className="flex-1">
                   {t.metrics.save}
                 </FmBtn>
                 <FmBtn variant="ghost" onClick={() => setFormOpen(false)}>✕</FmBtn>
@@ -230,17 +231,11 @@ export default function MetricsPage() {
         {metrics.length > 0 && (
           <div className={s.historyCard}>
             <div className={s.historyHead}>
-              {[
-                { label: t.metrics.date, flex: 1.2 },
-                { label: t.metrics.weightCol, flex: 1 },
-                { label: t.metrics.bodyFatCol, flex: 1 },
-                { label: t.metrics.muscleMassCol, flex: 1 },
-                { label: t.metrics.notesCol, flex: 1.5 },
-              ].map((col) => (
-                <span key={col.label} className={s.historyHeadCell} style={{ flex: col.flex }}>
-                  {col.label}
-                </span>
-              ))}
+              <span className={clsx(s.historyHeadCell, s.date)}>{t.metrics.date}</span>
+              <span className={clsx(s.historyHeadCell, s.val)}>{t.metrics.weightCol}</span>
+              <span className={clsx(s.historyHeadCell, s.val)}>{t.metrics.bodyFatCol}</span>
+              <span className={clsx(s.historyHeadCell, s.val)}>{t.metrics.muscleMassCol}</span>
+              <span className={clsx(s.historyHeadCell, s.notes)}>{t.metrics.notesCol}</span>
             </div>
             {metrics.map((m: BodyMetric) => (
               <HistoryRow key={m.id} m={m} />

@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, type CSSProperties } from "react";
+import clsx from "clsx";
 import { smartMatch, hasCyrillic } from "@/lib/transliterate";
+import s from "./fm.module.css";
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 export const T = {
@@ -156,14 +158,7 @@ export const Icon = {
 export function FmBadge({ cat, label }: { cat: string; label?: string }) {
   const color = CAT_COLOR[cat] ?? T.textSub;
   return (
-    <span style={{
-      display: "inline-flex", alignItems: "center",
-      padding: "2px 8px", borderRadius: 100,
-      fontSize: 10, fontWeight: 600,
-      fontFamily: "var(--font-barlow-condensed, sans-serif)",
-      letterSpacing: "0.06em", textTransform: "uppercase",
-      background: color + "1a", color,
-    }}>
+    <span className={s.badge} style={{ "--badge-color": color } as CSSProperties}>
       {label ?? (CAT_LABEL[cat] ?? (cat.charAt(0) + cat.slice(1).toLowerCase()))}
     </span>
   );
@@ -173,9 +168,14 @@ export function FmBadge({ cat, label }: { cat: string; label?: string }) {
 type BtnVariant = "primary" | "ghost" | "danger" | "muted";
 type BtnSize    = "sm" | "md" | "lg";
 
+const BTN_SIZE_CLASS: Record<BtnSize, string> = { sm: s.btnSm, md: s.btnMd, lg: s.btnLg };
+const BTN_VARIANT_CLASS: Record<BtnVariant, string> = {
+  primary: s.btnPrimary, ghost: s.btnGhost, danger: s.btnDanger, muted: s.btnMuted,
+};
+
 export function FmBtn({
   children, onClick, variant = "primary", size = "md",
-  disabled, loading, style: extStyle, type = "button",
+  disabled, loading, className, style: extStyle, type = "button",
 }: {
   children: React.ReactNode;
   onClick?: () => void;
@@ -183,40 +183,19 @@ export function FmBtn({
   size?: BtnSize;
   disabled?: boolean;
   loading?: boolean;
+  className?: string;
   style?: React.CSSProperties;
   type?: "button" | "submit";
 }) {
-  const pad = size === "sm" ? "7px 14px" : size === "lg" ? "15px 24px" : "11px 20px";
-  const fs  = size === "sm" ? 13 : size === "lg" ? 17 : 15;
-  const bg =
-    variant === "primary" ? T.accent :
-    variant === "danger"  ? T.danger :
-    variant === "muted"   ? T.bgInput :
-    "transparent";
-  const border = variant === "ghost" ? `1.5px solid ${T.border}` : "none";
-  const color  = variant === "primary" ? "#0d0d12" : T.textPrimary;
-
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
-      style={{
-        display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
-        padding: pad, borderRadius: 12, border, background: bg, color,
-        fontFamily: "var(--font-barlow-condensed, sans-serif)",
-        fontSize: fs, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase",
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.45 : 1,
-        transition: "opacity 0.15s, transform 0.1s",
-        ...extStyle,
-      }}
-      onMouseDown={(e) => { if (!disabled) (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
-      onMouseUp={(e)   => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
+      className={clsx(s.btn, BTN_SIZE_CLASS[size], BTN_VARIANT_CLASS[variant], className)}
+      style={extStyle}
     >
-      {loading
-        ? <span style={{ width: 14, height: 14, border: "2px solid rgba(0,0,0,0.2)", borderTopColor: variant === "primary" ? "#0d0d12" : T.textPrimary, borderRadius: "50%", animation: "fm-spin 0.7s linear infinite", display: "inline-block" }} />
-        : children}
+      {loading ? <span className={s.spinner} /> : children}
     </button>
   );
 }
@@ -230,33 +209,17 @@ export function AppHeader({
   onAccountClick?: () => void;
 }) {
   return (
-    <div style={{
-      padding: "14px 20px 10px",
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      background: T.bg, borderBottom: `1px solid ${T.borderLight}`, flexShrink: 0,
-    }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <div style={{ width: 28, height: 28, borderRadius: 8, background: T.accent, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className={s.header}>
+      <div className={s.headerLeft}>
+        <div className={s.logoDot}>
           <Icon.Bolt s={14} c="#0d0d12" />
         </div>
-        <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 20, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: T.textPrimary }}>
-          {title}
-        </span>
+        <span className={s.title}>{title}</span>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div className={s.headerRight}>
         {right}
         {onAccountClick && (
-          <button
-            onClick={onAccountClick}
-            style={{
-              width: 34, height: 34, borderRadius: "50%",
-              background: `linear-gradient(135deg, ${T.accent} 0%, oklch(0.62 0.22 50) 100%)`,
-              border: "none", cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: `0 0 0 2px ${T.bg}, 0 0 0 3.5px ${T.accentMid}`,
-              flexShrink: 0,
-            }}
-          >
+          <button onClick={onAccountClick} className={s.avatarBtn}>
             <Icon.User s={16} c="#0d0d12" />
           </button>
         )}
@@ -268,8 +231,8 @@ export function AppHeader({
 // ─── PageLoader (dark) ────────────────────────────────────────────────────────
 export function FmPageLoader() {
   return (
-    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: T.bg }}>
-      <span style={{ width: 32, height: 32, border: `3px solid ${T.border}`, borderTopColor: T.accentRaw, borderRadius: "50%", animation: "fm-spin 0.7s linear infinite", display: "inline-block" }} />
+    <div className={s.loaderWrap}>
+      <span className={s.pageLoaderSpinner} />
     </div>
   );
 }
@@ -280,13 +243,13 @@ export function FmEmpty({ icon: IconComp, title, body, action }: {
   title: string; body: string; action?: React.ReactNode;
 }) {
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, paddingTop: 60 }}>
-      <div style={{ width: 64, height: 64, borderRadius: 18, background: T.bgCard, border: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className={s.emptyWrap}>
+      <div className={s.emptyIconWrap}>
         <IconComp s={28} c={T.textMuted} />
       </div>
-      <div style={{ textAlign: "center" }}>
-        <p style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 22, fontWeight: 800, textTransform: "uppercase", color: T.textPrimary, marginBottom: 6 }}>{title}</p>
-        <p style={{ fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 13, color: T.textSub }}>{body}</p>
+      <div className={s.emptyTextWrap}>
+        <p className={s.emptyTitle}>{title}</p>
+        <p className={s.emptyBody}>{body}</p>
       </div>
       {action}
     </div>
@@ -303,7 +266,7 @@ function MuscleChip({ bucket }: { bucket: string }) {
     Other:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9"/></svg>,
   };
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 100, fontSize: 10, fontWeight: 600, fontFamily: "var(--font-barlow-condensed, sans-serif)", letterSpacing: "0.05em", background: T.bgInput, color: T.textSub, border: `1px solid ${T.border}` }}>
+    <span className={s.bucketChip}>
       {icons[bucket] ?? icons.Other}
       {bucket}
     </span>
@@ -344,21 +307,16 @@ export function FmExercisePicker({
 
   function renderExRow(ex: typeof exercises[0]) {
     const bucket = bucketOf(ex.muscleGroups ?? []);
+    const isSelected = ex.id === value;
     return (
       <button
         key={ex.id}
         type="button"
         onClick={() => { onChange(ex.id); setOpen(false); setSearch(""); setCatFilter(null); }}
-        style={{
-          width: "100%", padding: "9px 14px",
-          background: ex.id === value ? T.accentDim : "transparent",
-          border: "none", borderBottom: `1px solid ${T.borderLight}`,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          cursor: "pointer",
-        }}
+        className={clsx(s.exRow, isSelected && s.selected)}
       >
-        <span style={{ fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 13, color: ex.id === value ? T.accent : T.textPrimary, textAlign: "left", flex: 1, marginRight: 8 }}>{ex.name}</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+        <span className={clsx(s.exName, isSelected && s.selected)}>{ex.name}</span>
+        <div className={s.exMeta}>
           <MuscleChip bucket={bucket} />
           <FmBadge cat={ex.category} />
         </div>
@@ -367,51 +325,38 @@ export function FmExercisePicker({
   }
 
   return (
-    <div style={{ position: "relative" }}>
+    <div className={s.pickerWrap}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        style={{
-          width: "100%", padding: "10px 14px", borderRadius: 10,
-          background: T.bgInput, border: `1.5px solid ${open ? T.accent : T.border}`,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          cursor: "pointer", transition: "border-color 0.15s",
-        }}
+        className={clsx(s.trigger, open && s.open)}
       >
-        <span style={{ fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 14, color: selected ? T.textPrimary : T.textMuted }}>
+        <span className={clsx(s.triggerLabel, selected && s.selected)}>
           {selected ? selected.name : "Select exercise…"}
         </span>
         <Icon.ChevDown s={14} c={T.textSub} />
       </button>
 
       {open && (
-        <div style={{
-          position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50,
-          background: T.bgCard, border: `1.5px solid ${T.border}`, borderRadius: 10,
-          marginTop: 4, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-        }}>
+        <div className={s.dropdown}>
           {/* Search */}
-          <div style={{ padding: "8px 10px", borderBottom: `1px solid ${T.border}`, position: "relative" }}>
+          <div className={s.searchWrap}>
             <input
               autoFocus
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search… (ru/en)"
-              style={{ width: "100%", background: T.bgInput, border: `1.5px solid ${isCyr ? T.accent : T.border}`, borderRadius: 8, padding: "7px 32px 7px 10px", color: T.textPrimary, fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 13, outline: "none", transition: "border-color 0.15s" }}
+              className={clsx(s.searchInput, isCyr && s.cyr)}
             />
-            {isCyr && (
-              <span style={{ position: "absolute", right: 18, top: "50%", transform: "translateY(-50%)", fontSize: 11, color: T.accent, fontFamily: "var(--font-dm-sans, sans-serif)", fontWeight: 600, pointerEvents: "none", lineHeight: 1 }}>
-                RU
-              </span>
-            )}
+            {isCyr && <span className={s.ruBadge}>RU</span>}
           </div>
 
           {/* Category filter pills */}
-          <div style={{ display: "flex", gap: 6, padding: "8px 10px", borderBottom: `1px solid ${T.border}`, overflowX: "auto" }}>
+          <div className={s.catRow}>
             <button
               type="button"
               onClick={() => setCatFilter(null)}
-              style={{ flexShrink: 0, padding: "4px 10px", borderRadius: 100, border: `1.5px solid ${catFilter === null ? T.accent : T.border}`, background: catFilter === null ? T.accentDim : "transparent", color: catFilter === null ? T.accent : T.textSub, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", cursor: "pointer" }}
+              className={clsx(s.catPill, catFilter === null && s.active)}
             >All</button>
             {ALL_CATS.map((cat) => {
               const col = CAT_COLOR[cat];
@@ -421,18 +366,20 @@ export function FmExercisePicker({
                   key={cat}
                   type="button"
                   onClick={() => setCatFilter(active ? null : cat)}
-                  style={{ flexShrink: 0, padding: "4px 10px", borderRadius: 100, border: `1.5px solid ${active ? col : T.border}`, background: active ? col + "25" : "transparent", color: active ? col : T.textSub, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", cursor: "pointer", transition: "all 0.15s" }}
+                  data-active={active}
+                  style={{ "--cat-color": col } as CSSProperties}
+                  className={s.catPill}
                 >{CAT_LABEL[cat]}</button>
               );
             })}
           </div>
 
           {/* Exercise list */}
-          <div style={{ maxHeight: 260, overflowY: "auto" }}>
+          <div className={s.list}>
             {/* Recent section */}
             {recentExs.length > 0 && (
               <>
-                <div style={{ padding: "7px 14px 4px", fontSize: 10, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.textMuted }}>Recent</div>
+                <div className={s.sectionLabel}>Recent</div>
                 {recentExs.map(renderExRow)}
               </>
             )}
@@ -442,17 +389,17 @@ export function FmExercisePicker({
               <>
                 {filtered.map(renderExRow)}
                 {filtered.length === 0 && (
-                  <div style={{ padding: "12px 14px", fontSize: 13, color: T.textMuted, fontFamily: "var(--font-dm-sans, sans-serif)" }}>
+                  <div className={s.noResults}>
                     {isCyr ? "Ничего не найдено" : "No results"}
                   </div>
                 )}
               </>
             ) : (
               groupKeys.length === 0 && recentExs.length === 0 ? (
-                <div style={{ padding: "12px 14px", fontSize: 13, color: T.textMuted, fontFamily: "var(--font-dm-sans, sans-serif)" }}>No results</div>
+                <div className={s.noResults}>No results</div>
               ) : groupKeys.map((bucket) => (
                 <React.Fragment key={bucket}>
-                  <div style={{ padding: "7px 14px 4px", fontSize: 10, fontFamily: "var(--font-barlow-condensed, sans-serif)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.textMuted, display: "flex", alignItems: "center", gap: 5 }}>
+                  <div className={clsx(s.sectionLabel, s.sectionLabelBucket)}>
                     <MuscleChip bucket={bucket} />
                   </div>
                   {grouped[bucket].map(renderExRow)}
@@ -474,6 +421,8 @@ export function FmStyles() {
       @keyframes fm-pulse   { 0%,100%{opacity:1} 50%{opacity:0.4} }
       @keyframes fm-barGrow { from{transform:scaleY(0)} to{transform:scaleY(1)} }
       @keyframes fm-fadeUp  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+      @keyframes fm-slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+      @keyframes rw-flip    { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
       input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     `}</style>
   );

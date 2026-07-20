@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
+import clsx from "clsx";
 import { useRouter } from "next/navigation";
-import { T, FmBtn, FmPageLoader, AppHeader } from "@/components/fm";
+import { FmBtn, FmPageLoader } from "@/components/fm";
 import { useTodayWorkout, useGeneratePlan, useStartTodayWorkout } from "../hooks/usePlans";
 import { useMyProgram } from "@/features/programs/hooks/usePrograms";
 import { AlternativeDrawer } from "@/features/workouts/components/AlternativeDrawer";
 import type { PrescribedExercise } from "../plans.api";
 import type { Exercise } from "@/features/exercises/exercises.api";
+import s from "./TodayWorkoutPage.module.css";
 
 export function TodayWorkoutPage({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
@@ -29,15 +31,15 @@ export function TodayWorkoutPage({ compact = false }: { compact?: boolean }) {
 
   if (!today) {
     return (
-      <div style={{ padding: compact ? "16px" : "40px 16px", maxWidth: 480, margin: "0 auto", textAlign: "center" }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
-        <h2 style={{ fontFamily: "var(--font-barlow-condensed)", fontSize: 26, fontWeight: 800, color: T.textPrimary, textTransform: "uppercase", margin: "0 0 12px" }}>
+      <div className={clsx(s.emptyWrap, compact && s.compact)}>
+        <div className={s.emptyIcon}>📋</div>
+        <h2 className={s.emptyTitle}>
           No workout plan yet
         </h2>
         {myProgram ? (
           <>
-            <p style={{ color: T.textSub, fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
-              You have <strong style={{ color: T.accent }}>{myProgram.name}</strong> selected.
+            <p className={s.emptyBody}>
+              You have <strong>{myProgram.name}</strong> selected.
               Generate your personalized plan to get started.
             </p>
             <FmBtn onClick={handleGenerate} disabled={generatePlan.isPending} size="lg">
@@ -46,7 +48,7 @@ export function TodayWorkoutPage({ compact = false }: { compact?: boolean }) {
           </>
         ) : (
           <>
-            <p style={{ color: T.textSub, fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
+            <p className={s.emptyBody}>
               First choose a training program, then generate your plan.
             </p>
             <FmBtn onClick={() => router.push("/programs")} size="lg">
@@ -59,22 +61,22 @@ export function TodayWorkoutPage({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <div style={{ padding: compact ? "14px 16px" : "24px 16px", maxWidth: compact ? "none" : 560, margin: "0 auto" }}>
+    <div className={clsx(s.page, compact && s.compact)}>
       {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <p style={{ margin: "0 0 4px", fontSize: 12, color: T.textMuted, textTransform: "uppercase", fontWeight: 700, letterSpacing: 0.8 }}>
+      <div className={s.header}>
+        <p className={s.headerEyebrow}>
           {today.plan.templateName}
         </p>
-        <h1 style={{ fontFamily: "var(--font-barlow-condensed)", fontSize: 28, fontWeight: 900, textTransform: "uppercase", color: T.textPrimary, margin: 0 }}>
+        <h1 className={s.headerTitle}>
           {today.dayLabel}
         </h1>
-        <p style={{ margin: "6px 0 0", fontSize: 13, color: T.textSub }}>
+        <p className={s.headerMeta}>
           Week {today.currentWeek} · Day {today.currentDay} · {today.exercises.length} exercises
         </p>
       </div>
 
       {/* Exercise list */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+      <div className={s.exerciseList}>
         {today.exercises.map((ex, i) => (
           <ExerciseRow key={ex.planExerciseId} ex={ex} index={i} />
         ))}
@@ -82,11 +84,11 @@ export function TodayWorkoutPage({ compact = false }: { compact?: boolean }) {
 
       {/* CTA */}
       {today.alreadyStarted ? (
-        <FmBtn size="lg" onClick={() => router.push(`/workouts/${today.sessionId}`)} style={{ width: "100%" }}>
+        <FmBtn size="lg" onClick={() => router.push(`/workouts/${today.sessionId}`)} className="w-full">
           Continue workout →
         </FmBtn>
       ) : (
-        <FmBtn size="lg" onClick={handleStart} disabled={startToday.isPending} style={{ width: "100%" }}>
+        <FmBtn size="lg" onClick={handleStart} disabled={startToday.isPending} className="w-full">
           {startToday.isPending ? "Starting…" : "Start workout"}
         </FmBtn>
       )}
@@ -111,77 +113,50 @@ function ExerciseRow({ ex, index }: { ex: PrescribedExercise; index: number }) {
 
   return (
     <>
-      <div style={{
-        background: T.bgCard,
-        border: `1px solid ${isSubstituted ? T.accent + "60" : T.border}`,
-        borderRadius: 14, padding: "14px 16px",
-        display: "flex", gap: 14, alignItems: "center",
-        position: "relative",
-      }}>
+      <div className={clsx(s.row, isSubstituted && s.substituted)}>
         {/* GIF thumbnail if available */}
         {(overrideEx?.gifUrl ?? ex.gifUrl) && (
           <img
             src={overrideEx?.gifUrl ?? ex.gifUrl!}
             alt={displayName}
-            style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", flexShrink: 0 }}
+            className={s.thumb}
           />
         )}
 
         {/* Index bubble (shown when no gif) */}
         {!(overrideEx?.gifUrl ?? ex.gifUrl) && (
-          <div style={{
-            width: 32, height: 32, borderRadius: "50%",
-            background: T.accentDim,
-            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-          }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: T.accent }}>{index + 1}</span>
+          <div className={s.indexBubble}>
+            <span>{index + 1}</span>
           </div>
         )}
 
         {/* Info */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: T.textPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <div className={s.info}>
+          <div className={s.nameRow}>
+            <p className={s.name}>
               {displayName}
             </p>
             {isSubstituted && (
-              <span style={{ fontSize: 9, fontFamily: "var(--font-barlow-condensed)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: T.accent, background: T.accentDim, padding: "2px 6px", borderRadius: 6, flexShrink: 0 }}>
+              <span className={s.swapBadge}>
                 swap
               </span>
             )}
           </div>
-          <p style={{ margin: "3px 0 0", fontSize: 12, color: T.textMuted }}>
+          <p className={s.muscles}>
             {displayMuscles.slice(0, 2).join(" · ")}
           </p>
         </div>
 
         {/* Right side */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: T.textPrimary }}>
+        <div className={s.rightCol}>
+          <p className={s.setsReps}>
             {sets} × {repsMin === repsMax ? repsMin : `${repsMin}–${repsMax}`}
           </p>
-          <p style={{ margin: 0, fontSize: 11, color: T.textMuted }}>
+          <p className={s.rpeRest}>
             {rpe ? `RPE ${rpe}` : ""}{rpe && restSec ? " · " : ""}{restSec ? `${restSec}s` : ""}
           </p>
           {/* No equipment button */}
-          <button
-            onClick={() => setDrawerOpen(true)}
-            style={{
-              fontSize: 10, fontFamily: "var(--font-barlow-condensed)", fontWeight: 700,
-              letterSpacing: "0.06em", textTransform: "uppercase",
-              color: T.textMuted, background: "transparent", border: `1px solid ${T.border}`,
-              borderRadius: 6, padding: "2px 8px", cursor: "pointer",
-              transition: "color 0.15s, border-color 0.15s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = T.accent;
-              e.currentTarget.style.borderColor = T.accent;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = T.textMuted;
-              e.currentTarget.style.borderColor = T.border;
-            }}
-          >
+          <button onClick={() => setDrawerOpen(true)} className={s.noEquipBtn}>
             ⚡ No equip
           </button>
         </div>

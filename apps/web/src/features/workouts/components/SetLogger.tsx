@@ -277,7 +277,7 @@ export function SetLogger({ session, allSessions, initialExerciseId, onDone }: S
               </div>
             )}
 
-            <FmBtn onClick={() => logSet()} disabled={!canLog} loading={logging} style={{ width: "100%" }}>
+            <FmBtn onClick={() => logSet()} disabled={!canLog} loading={logging} className="w-full">
               {t.workouts.logSets}
             </FmBtn>
           </>

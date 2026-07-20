@@ -8,12 +8,13 @@ import {
   type WorkoutHistory,
 } from "@/features/workouts/workouts.api";
 import { getExercises } from "@/features/exercises/exercises.api";
-import { T, Icon, FmBtn, FmPageLoader, FmEmpty, FmExercisePicker, AppHeader } from "@/components/fm";
+import { Icon, FmBtn, FmPageLoader, FmEmpty, FmExercisePicker, AppHeader } from "@/components/fm";
 import { WorkoutHistoryCard } from "@/features/workouts/components/WorkoutHistoryCard";
 import { groupByWorkoutWindow } from "@/features/workouts/workouts.utils";
 import { SetLogger } from "@/features/workouts/components/SetLogger";
 import { useLang, useT } from "@/lib/lang-context";
 import { useSettings } from "@/lib/settings-context";
+import s from "./page.module.css";
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 export default function WorkoutsPage() {
@@ -60,7 +61,7 @@ export default function WorkoutsPage() {
     .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
 
   return (
-    <div style={{ background: T.bg, minHeight: "100%", display: "flex", flexDirection: "column" }}>
+    <div className={s.page}>
       <AppHeader
         title={t.workouts.title}
         onAccountClick={openSettings}
@@ -74,24 +75,24 @@ export default function WorkoutsPage() {
       {/* Start modal */}
       {pickingExercise && !ongoing && (
         <div
-          style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "start", justifyContent: "center", padding: 20 }}
+          className={s.modalOverlay}
           onClick={(e) => { if (e.target === e.currentTarget) { setPickingExercise(false); setStartExerciseId(""); } }}
         >
-          <div style={{ background: T.bgCard, borderRadius: 18, border: `1px solid ${T.border}`, padding: 24, width: "100%", maxWidth: 380, display: "flex", flexDirection: "column", gap: 18 }}>
+          <div className={s.modalCard}>
             <div>
-              <p style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 22, fontWeight: 900, textTransform: "uppercase", color: T.textPrimary, marginBottom: 4 }}>{t.workouts.newWorkout}</p>
-              <p style={{ fontFamily: "var(--font-dm-sans, sans-serif)", fontSize: 13, color: T.textSub }}>{t.workouts.newWorkoutBody}</p>
+              <p className={s.modalTitle}>{t.workouts.newWorkout}</p>
+              <p className={s.modalBody}>{t.workouts.newWorkoutBody}</p>
             </div>
             <FmExercisePicker value={startExerciseId} onChange={setStartExerciseId} exercises={exercises} />
-            <div style={{ display: "flex", gap: 10 }}>
-              <FmBtn variant="ghost" style={{ flex: 1 }} onClick={() => { setPickingExercise(false); setStartExerciseId(""); }}>{t.workouts.cancel}</FmBtn>
-              <FmBtn style={{ flex: 1 }} disabled={!startExerciseId} loading={starting} onClick={() => start()}>{t.workouts.start}</FmBtn>
+            <div className={s.modalActions}>
+              <FmBtn variant="ghost" className="flex-1" onClick={() => { setPickingExercise(false); setStartExerciseId(""); }}>{t.workouts.cancel}</FmBtn>
+              <FmBtn className="flex-1" disabled={!startExerciseId} loading={starting} onClick={() => start()}>{t.workouts.start}</FmBtn>
             </div>
           </div>
         </div>
       )}
 
-      <div style={{ flex: 1, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
+      <div className={s.content}>
         {ongoing && (
           <SetLogger
             key={ongoing.id}
@@ -115,9 +116,9 @@ export default function WorkoutsPage() {
           />
         ) : history.length > 0 ? (
           <>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.textSub }}>{t.workouts.history}</span>
-              <span style={{ fontSize: 11, color: T.textMuted }}>{history.length} {t.workouts.sessions}</span>
+            <div className={s.historyHeader}>
+              <span className={s.historyTitle}>{t.workouts.history}</span>
+              <span className={s.historyCount}>{history.length} {t.workouts.sessions}</span>
             </div>
             {groupByWorkoutWindow(history).map(({ key, sessions: grouped }) => {
               const validSessions = grouped.filter((w) => w.sets.length > 0);
@@ -128,11 +129,11 @@ export default function WorkoutsPage() {
               });
               const isMulti = validSessions.length > 1;
               return (
-                <div key={key} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontFamily: "var(--font-barlow-condensed, sans-serif)", fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: T.textSub, letterSpacing: "0.08em" }}>{label}</span>
+                <div key={key} className={s.historyGroup}>
+                  <div className={s.historyGroupHead}>
+                    <span className={s.historyGroupLabel}>{label}</span>
                     {isMulti && (
-                      <span style={{ fontSize: 11, color: T.textMuted, background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 6, padding: "1px 6px" }}>
+                      <span className={s.multiBadge}>
                         {validSessions.length} {lang === "ru" ? "тренировки" : "sessions"}
                       </span>
                     )}

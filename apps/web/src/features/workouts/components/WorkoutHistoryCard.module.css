@@ -21,6 +21,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: color-mix(in srgb, var(--accent-color) 15%, transparent);
+}
+
+.infoCol {
+  flex: 1;
+  min-width: 0;
 }
 
 .titleRow {

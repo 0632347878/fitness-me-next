@@ -62,10 +62,10 @@ export function DangerZone({ onReset }: DangerZoneProps) {
           <p className={s.confirmTitle}>{s_.resetConfirmTitle}</p>
           <p className={s.confirmDesc}>{s_.resetConfirmDesc}</p>
           <div className={s.confirmActions}>
-            <FmBtn variant="ghost" size="sm" style={{ flex: 1 }} onClick={() => setState("idle")}>
+            <FmBtn variant="ghost" size="sm" onClick={() => setState("idle")}>
               {s_.cancelReset}
             </FmBtn>
-            <FmBtn variant="danger" size="sm" style={{ flex: 1 }} onClick={handleReset}>
+            <FmBtn variant="danger" size="sm" onClick={handleReset}>
               <TrashIcon /> {s_.confirmReset}
             </FmBtn>
           </div>
@@ -77,7 +77,7 @@ export function DangerZone({ onReset }: DangerZoneProps) {
           size="sm"
           loading={state === "loading"}
           onClick={() => setState("confirm")}
-          style={{ borderColor: "color-mix(in srgb, var(--fm-danger) 27%, transparent)", color: "var(--fm-danger)" }}
+          className={s.dangerGhostBtn}
         >
           <TrashIcon /> {s_.resetHistory}
         </FmBtn>

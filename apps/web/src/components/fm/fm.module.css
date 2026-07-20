@@ -1,0 +1,329 @@
+/* ─── FmBadge ─────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-barlow-condensed, sans-serif);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--badge-color) 10%, transparent);
+  color: var(--badge-color);
+}
+
+/* ─── FmBtn ───────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  border: none;
+}
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.btnSm { padding: 7px 14px; font-size: 13px; }
+.btnMd { padding: 11px 20px; font-size: 15px; }
+.btnLg { padding: 15px 24px; font-size: 17px; }
+
+.btnPrimary { background: var(--fm-accent); color: #0d0d12; }
+.btnGhost   { background: transparent; color: var(--fm-text-primary); border: 1.5px solid var(--fm-border); }
+.btnDanger  { background: var(--fm-danger); color: var(--fm-text-primary); }
+.btnMuted   { background: var(--fm-bg-input); color: var(--fm-text-primary); }
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: var(--fm-text-primary);
+  border-radius: 50%;
+  animation: fm-spin 0.7s linear infinite;
+  display: inline-block;
+}
+.btnPrimary .spinner { border-top-color: #0d0d12; }
+
+/* ─── AppHeader ───────────────────────────────────────────────────────────── */
+.header {
+  padding: 14px 20px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--fm-bg);
+  border-bottom: 1px solid var(--fm-border-light);
+  flex-shrink: 0;
+}
+.headerLeft, .headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logoDot {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--fm-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.title {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fm-text-primary);
+}
+.avatarBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--fm-accent) 0%, oklch(0.62 0.22 50) 100%);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px var(--fm-bg), 0 0 0 3.5px var(--fm-accent-mid);
+  flex-shrink: 0;
+}
+
+/* ─── FmPageLoader ────────────────────────────────────────────────────────── */
+.loaderWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fm-bg);
+}
+.pageLoaderSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--fm-border);
+  border-top-color: var(--fm-accent-raw);
+  border-radius: 50%;
+  animation: fm-spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+/* ─── FmEmpty ─────────────────────────────────────────────────────────────── */
+.emptyWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding-top: 60px;
+}
+.emptyIconWrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: var(--fm-bg-card);
+  border: 1px solid var(--fm-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.emptyTextWrap { text-align: center; }
+.emptyTitle {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--fm-text-primary);
+  margin-bottom: 6px;
+}
+.emptyBody {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 13px;
+  color: var(--fm-text-sub);
+}
+
+/* ─── local MuscleChip (bucket chip) ─────────────────────────────────────── */
+.bucketChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-barlow-condensed, sans-serif);
+  letter-spacing: 0.05em;
+  background: var(--fm-bg-input);
+  color: var(--fm-text-sub);
+  border: 1px solid var(--fm-border);
+}
+
+/* ─── FmExercisePicker ────────────────────────────────────────────────────── */
+.pickerWrap { position: relative; }
+
+.trigger {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--fm-bg-input);
+  border: 1.5px solid var(--fm-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.trigger.open { border-color: var(--fm-accent); }
+
+.triggerLabel {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 14px;
+  color: var(--fm-text-muted);
+}
+.triggerLabel.selected { color: var(--fm-text-primary); }
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--fm-bg-card);
+  border: 1.5px solid var(--fm-border);
+  border-radius: 10px;
+  margin-top: 4px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.searchWrap {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--fm-border);
+  position: relative;
+}
+.searchInput {
+  width: 100%;
+  background: var(--fm-bg-input);
+  border: 1.5px solid var(--fm-border);
+  border-radius: 8px;
+  padding: 7px 32px 7px 10px;
+  color: var(--fm-text-primary);
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.searchInput.cyr { border-color: var(--fm-accent); }
+.ruBadge {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--fm-accent);
+  font-family: var(--font-dm-sans, sans-serif);
+  font-weight: 600;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.catRow {
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--fm-border);
+  overflow-x: auto;
+}
+.catPill {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1.5px solid var(--fm-border);
+  background: transparent;
+  color: var(--fm-text-sub);
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.catPill.active {
+  border-color: var(--fm-accent);
+  background: var(--fm-accent-dim);
+  color: var(--fm-accent);
+}
+.catPill[data-active="true"] {
+  border-color: var(--cat-color);
+  background: color-mix(in srgb, var(--cat-color) 15%, transparent);
+  color: var(--cat-color);
+}
+
+.list { max-height: 260px; overflow-y: auto; }
+
+.sectionLabel {
+  padding: 7px 14px 4px;
+  font-size: 10px;
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fm-text-muted);
+}
+.sectionLabelBucket {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.exRow {
+  width: 100%;
+  padding: 9px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--fm-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.exRow.selected { background: var(--fm-accent-dim); }
+
+.exName {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 13px;
+  color: var(--fm-text-primary);
+  text-align: left;
+  flex: 1;
+  margin-right: 8px;
+}
+.exName.selected { color: var(--fm-accent); }
+
+.exMeta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.noResults {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--fm-text-muted);
+  font-family: var(--font-dm-sans, sans-serif);
+}
+
+/* ─── Global keyframes (still injected once via <FmStyles/>) ─────────────── */

@@ -1,0 +1,166 @@
+.card {
+  background: var(--fm-bg-card);
+  border: 2px solid var(--fm-border);
+  border-radius: 16px;
+  padding: 20px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.card.current {
+  border-color: var(--fm-accent);
+  box-shadow: 0 0 0 3px var(--fm-accent-dim);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.headerLeft { flex: 1; }
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.name {
+  font-family: var(--font-barlow-condensed);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--fm-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pill {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+.pillCurrent { background: var(--fm-accent); color: #0d0d12; }
+.pillLocked {
+  background: var(--fm-bg-input);
+  color: var(--fm-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.pillMatch {
+  background: var(--fm-accent-dim);
+  color: var(--fm-accent);
+  font-weight: 600;
+}
+
+.byline {
+  font-size: 13px;
+  color: var(--fm-text-sub);
+  margin: 4px 0 0;
+  line-height: 1.4;
+}
+
+.levelBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--level-color) 13%, transparent);
+  color: var(--level-color);
+}
+
+.description {
+  font-size: 13px;
+  color: var(--fm-text-sub);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.tagRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--tag-color) 9%, transparent);
+  color: var(--tag-color);
+  border: 1px solid color-mix(in srgb, var(--tag-color) 19%, transparent);
+}
+
+.prosConsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.sectionTitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tag-color);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.list {
+  margin: 6px 0 0;
+  padding: 0 0 0 16px;
+}
+.list li {
+  font-size: 12px;
+  color: var(--fm-text-sub);
+  margin-bottom: 2px;
+}
+
+.bestForRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.bestForPill {
+  font-size: 11px;
+  background: var(--fm-bg-input);
+  color: var(--fm-text-sub);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.actionBtn {
+  margin-top: 4px;
+  padding: 12px 0;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  background: var(--fm-accent);
+  color: #0d0d12;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.actionBtn.current {
+  cursor: default;
+  background: var(--fm-bg-input);
+  color: var(--fm-text-muted);
+}
+.actionBtn.saving { cursor: wait; }
+.actionBtn.locked {
+  border: 1px solid var(--fm-border);
+  background: transparent;
+  color: var(--fm-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: default;
+}
+.actionBtn.locked.clickable { cursor: pointer; }
+
+.lockIcon { font-size: 13px; }
