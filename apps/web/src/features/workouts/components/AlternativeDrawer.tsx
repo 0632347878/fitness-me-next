@@ -30,7 +30,7 @@ export function AlternativeDrawer({ exerciseId, open, onClose, onSelect }: Props
 
       {/* Sheet */}
       <div style={{
-        position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 50,
+        position: "fixed", bottom: 52, left: 0, right: 0, zIndex: 50,
         background: T.bgCard,
         borderRadius: "20px 20px 0 0",
         border: `1px solid ${T.border}`,

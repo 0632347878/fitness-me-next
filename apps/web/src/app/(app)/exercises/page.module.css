@@ -1,4 +1,3 @@
-rt/* ─── Page ─────────────────────────────────────────────────────────────────── */
 .page {
   background: var(--fm-bg);
   min-height: 100%;
@@ -158,7 +157,7 @@ rt/* ─── Page ────────────────────
 /* ─── Grid ─────────────────────────────────────────────────────────────────── */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 10px;
 }
 
@@ -191,7 +190,7 @@ rt/* ─── Page ────────────────────
   text-align: left;
   background: var(--fm-bg-card);
   border: 1px solid var(--fm-border-light);
-  border-radius: 14px;
+  /*border-radius: 14px;*/
   padding: 14px 16px;
   cursor: pointer;
   transition: all 0.15s;
@@ -221,6 +220,15 @@ rt/* ─── Page ────────────────────
   flex: 1;
 }
 
+.exerciseCardWrapper {
+  width: calc(100% + 32px);
+  /*margin-left: -32px;*/
+
+  img {
+    margin-left: -15px;
+  }
+}
+
 .cardMuscles {
   display: flex;
   flex-wrap: wrap;
@@ -237,7 +245,7 @@ rt/* ─── Page ────────────────────
   width: 100%;
   height: 160px;
   object-fit: cover;
-  border-radius: 8px;
+  /*border-radius: 8px;*/
   margin-top: 6px;
   display: block;
 }

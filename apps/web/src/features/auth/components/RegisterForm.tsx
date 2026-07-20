@@ -25,7 +25,7 @@ function Logo() {
         ⚡
       </div>
       <span style={{ fontFamily: "var(--font-barlow-condensed, 'Barlow Condensed', sans-serif)", fontSize: 26, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: T.textPrimary }}>
-        FITME
+        REPWISE
       </span>
     </div>
   );

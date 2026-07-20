@@ -9,6 +9,8 @@ import { useLang, useT } from "@/lib/lang-context";
 import { useSettings } from "@/lib/settings-context";
 import { transliterate, hasCyrillic } from "@/lib/transliterate";
 import s from "./page.module.css";
+import ExerciseCard from "@/components/ui/ExerciseCard";
+import gifUrl  from "@/utils";
 
 const CATEGORIES = ["STRENGTH", "CARDIO", "FLEXIBILITY", "MOBILITY"] as const;
 
@@ -27,52 +29,6 @@ function CloseIcon({ size = 18 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
       <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
     </svg>
-  );
-}
-
-// ─── Muscle chip ──────────────────────────────────────────────────────────────
-function MuscleChip({ label }: { label: string }) {
-  return <span className={s.chip}>{label}</span>;
-}
-
-// ─── Gif URL builder ─────────────────────────────────────────────────────────
-function gifUrl(src: string | null): string | null {
-  if (!src) return null;
-  if (src.startsWith("/")) return src; // already local → serve directly
-  return `/api/gif?url=${encodeURIComponent(src)}`; // remote → proxy
-}
-
-// ─── Exercise card ────────────────────────────────────────────────────────────
-function ExerciseCard({ ex, lang, onClick }: { ex: Exercise; lang: string; onClick: () => void }) {
-  const displayName = lang === "ru" ? (ex.nameRu ?? ex.name) : ex.name;
-  const gif = gifUrl(ex.gifUrl);
-  return (
-    <button className={s.card} onClick={onClick}>
-      <div className={s.cardTop}>
-        <span className={s.cardName}>{displayName}</span>
-        <FmBadge cat={ex.category} />
-      </div>
-      <div className={s.cardMuscles}>
-        {ex.muscleGroups.slice(0, 3).map((m) => <MuscleChip key={m} label={m} />)}
-        {ex.muscleGroups.length > 3 && (
-          <span className={s.cardMore}>+{ex.muscleGroups.length - 3}</span>
-        )}
-      </div>
-      {ex.equipment && (
-        <span className={s.cardEquipment}>🏋️ {ex.equipment}</span>
-      )}
-      {gif && (
-        <Image
-          className={s.cardGif}
-          src={gif}
-          alt={displayName}
-          width={300}
-          height={160}
-          unoptimized
-          onError={() => console.warn("[gif] failed to load:", ex.gifUrl)}
-        />
-      )}
-    </button>
   );
 }
 
@@ -166,6 +122,7 @@ export default function ExercisesPage() {
     queryKey: ["exercises", apiSearch, category, equipment, page, lang],
     queryFn: () => getExercises({ search: apiSearch, category: category || undefined, equipment: equipment || undefined, page, limit: 20, lang }),
     placeholderData: (prev) => prev,
+    staleTime: 5 * 60 * 1000,
   });
 
   return (

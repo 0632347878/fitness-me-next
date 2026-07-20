@@ -37,7 +37,7 @@ function Logo() {
           textTransform: "uppercase", color: T.textPrimary,
         }}
       >
-        FITME
+        REPWISE
       </span>
     </div>
   );

@@ -163,6 +163,7 @@ export const translations = {
       allCategories: "Все категории",
       allEquipment: "Всё оборудование",
       muscleGroups: "Группы мышц",
+      difficulty: "Сложность",
       equipment: "Оборудование",
       instructions: "Инструкция",
       previous: "Назад",

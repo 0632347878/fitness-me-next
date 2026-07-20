@@ -1,16 +1,19 @@
 import { NextRequest } from "next/server";
 
+/**
+ * Тонкий прокси для картинок из источников, требующих ключ (напр. WorkoutX).
+ * free-exercise-db (raw.githubusercontent.com) сюда НЕ ходит — грузится напрямую
+ * из gifUrl(), см. src/utils.ts. Никакого Redis на фронте: кэшируют браузер и CDN.
+ */
 export async function GET(req: NextRequest) {
   const url = req.nextUrl.searchParams.get("url");
   if (!url) return new Response("missing url", { status: 400 });
 
-  const apiKey = process.env.NEXT_PUBLIC_WORKOUTX_API_KEY;
-  if (!apiKey) return new Response("WORKOUTX_API_KEY not set", { status: 500 });
+  const headers: Record<string, string> = {};
+  const wxKey = process.env.NEXT_PUBLIC_WORKOUTX_API_KEY;
+  if (wxKey && url.includes("workoutxapp")) headers["X-WorkoutX-Key"] = wxKey;
 
-  const upstream = await fetch(url, {
-    headers: { "X-WorkoutX-Key": apiKey },
-  });
-
+  const upstream = await fetch(url, { headers });
   if (!upstream.ok) {
     return new Response("upstream error", { status: upstream.status });
   }
@@ -18,9 +21,9 @@ export async function GET(req: NextRequest) {
   return new Response(upstream.body, {
     status: 200,
     headers: {
-      "Content-Type": upstream.headers.get("Content-Type") ?? "image/gif",
-      "Cache-Control": "public, max-age=86400, immutable",
+      "Content-Type": upstream.headers.get("Content-Type") ?? "image/jpeg",
+      // Картинки упражнений неизменны → год, immutable. Браузер тянет один раз.
+      "Cache-Control": "public, max-age=31536000, immutable",
     },
   });
 }
-

@@ -27,8 +27,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Fitness App",
-  description: "Track your workouts, metrics and nutrition",
+  title: "Repwise — train smarter, log every rep",
+  description: "Science-backed workout plans, a rich exercise library, and progress tracking that adapts to you.",
 };
 
 export default async function RootLayout({

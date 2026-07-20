@@ -38,6 +38,7 @@
 | 5 | **Dashboard** — summary across features | — | — | — | — |
 | 6 | **Nutrition log** — daily macros | — | — | — | — |
 | 7 | CI/CD · deploy | — | — | — | — |
+| 8 | **AI Coach** — chat-агент поверх Exercises/Workouts/Plans/Metrics | — | — | — | — |
 
 ---
 
@@ -476,6 +477,102 @@ NEXTAUTH_SECRET
 
 ---
 
+## Iteration 8 — AI Coach 👈
+
+> Агент поверх уже существующих доменов (Exercises, Workouts, Plans, Programs, Metrics).
+> Никакой отдельной «AI-базы данных» — Claude вызывает те же сервисы через tool use.
+> Порядок: DB (новые таблицы диалога) → API (ai module) → Web (чат) → Mobile.
+
+### Почему после Nutrition, а не раньше
+
+Агенту есть смысл рассуждать только когда у него есть за что зацепиться: план тренировок (`plans`), история сетов (`workouts`), метрики тела (`metrics`), дневник питания (`nutrition`). Итерации 2–6 как раз производят эти данные — AI Coach их читает, а не создаёт с нуля.
+
+### DB: `fitness-app-backend/packages/database`
+
+| # | Task |
+|---|---|
+| 8-DB-1 | `AiConversation` — id, userId FK, title?, createdAt, updatedAt |
+| 8-DB-2 | `AiMessage` — id, conversationId FK, role (`user` \| `assistant` \| `tool`), content (text/JSON), createdAt |
+| 8-DB-3 | `AiToolCall` — id, messageId FK, toolName, input (Json), output (Json), status (`ok` \| `error` \| `needs_confirmation`), createdAt |
+| 8-DB-4 | Индекс `AiMessage(conversationId, createdAt)` для быстрой подгрузки истории |
+| 8-DB-5 | `prisma migrate dev --name ai_coach` |
+
+**Done when:** таблицы созданы, `prisma studio` показывает связи `User → AiConversation → AiMessage → AiToolCall`.
+
+---
+
+### BE: `packages/api/src/ai/`
+
+| # | Task |
+|---|---|
+| 8-BE-1 | `AiModule` — `ai.module.ts controller service` + `AiToolsService` (реестр инструментов) |
+| 8-BE-2 | `POST /ai/conversations` — создать диалог; `GET /ai/conversations` — список; `GET /ai/conversations/:id` — история |
+| 8-BE-3 | `POST /ai/conversations/:id/messages` — SSE-стрим ответа Claude (Anthropic SDK, `stream: true`) |
+| 8-BE-4 | Системный промпт собирается динамически: `UserProfile` + текущий `WorkoutPlan` (`PlansService.getMyPlan`) + последние 5 `BodyMetric` + `TodayWorkout` |
+| 8-BE-5 | Регистрация read-only tools (выполняются без подтверждения): `search_exercises` → `ExercisesService.findAll`, `get_alternatives` → `ExercisesService.getAlternatives`, `get_metrics_history` → `MetricsService.getMetrics`, `get_today_workout` → `PlansService.getTodayWorkout`, `recommend_programs` → `ProgramsService.getRecommendedPrograms` |
+| 8-BE-6 | Регистрация write tools (требуют `needs_confirmation` от фронта перед реальным вызовом): `log_set` → `WorkoutsService.logSets`, `log_metric` → `MetricsService.logMetric`, `assign_program` → `ProgramsService.assignProgram` |
+| 8-BE-7 | Guard: white-list токенов на деструктивные операции (`deleteAllWorkouts`, `updateSessionNotes` и т.п.) — эти tools в реестр вообще не попадают |
+| 8-BE-8 | Rate-limit на `/ai/conversations/:id/messages` (Fastify rate-limit, отдельный лимит от общего API) |
+| 8-BE-9 | Промпт-guard: контент из `notes` (WorkoutSession) и произвольного ввода пользователя явно маркируется как data, не instructions, при сборке system-промпта |
+| 8-BE-10 | Swagger-теги для `/ai/*` |
+
+**Response shape (SSE event):**
+```ts
+// text delta
+{ type: "text", delta: string }
+// модель хочет вызвать write tool — ждёт подтверждения фронта
+{ type: "tool_confirm", toolCallId: string, toolName: string, input: unknown }
+// tool выполнен (read-only или подтверждённый write)
+{ type: "tool_result", toolCallId: string, output: unknown }
+```
+
+**Done when:** `curl -N localhost:3001/ai/conversations/:id/messages` стримит текст; read-only tools выполняются сразу; write tools возвращают `tool_confirm` и ждут `POST /ai/tool-calls/:id/confirm`.
+
+---
+
+### Web: `apps/web/src/features/ai-coach/`
+
+| # | Task |
+|---|---|
+| 8-WEB-1 | `api.ts` — `createConversation()`, `getConversations()`, `streamMessage(conversationId, text)` (fetch + ReadableStream), `confirmToolCall(id)` |
+| 8-WEB-2 | `hooks/useAiChat.ts` — стриминг в состояние, буферизация text-дельт |
+| 8-WEB-3 | `components/ChatWindow.tsx` — история сообщений, авто-скролл |
+| 8-WEB-4 | `components/ToolConfirmCard.tsx` — карточка «Claude хочет залогировать подход: жим лёжа 3×10×80кг — подтвердить/отменить» |
+| 8-WEB-5 | `components/ChatInput.tsx` — текстовый ввод + (опционально) голосовой ввод через Web Speech API |
+| 8-WEB-6 | `AiCoachPage.tsx` — страница чата, использует FitMe design-system (`FmBtn`, токены `T.*`) |
+| 8-WEB-7 | `app/(app)/ai-coach/page.tsx` — 2 строки: import + `<AiCoachPage />` |
+| 8-WEB-8 | Плавающая кнопка чата в `(app)/layout.tsx` — быстрый доступ с любого экрана |
+
+**Done when:** диалог создаётся, текст стримится токен за токеном, read-only tool-вызовы (например, подбор альтернативы упражнения) отображаются инлайн, write tool-вызовы показывают confirm-карточку и не исполняются без клика.
+
+---
+
+### Mobile: `apps/mobile/app/(tabs)/ai-coach/`
+
+| # | Task |
+|---|---|
+| 8-MOB-1 | `features/ai-coach/api.ts` — те же вызовы, что и web |
+| 8-MOB-2 | `hooks/useAiChat.ts` — идентично web, стриминг через `fetch` + `TextDecoder` (RN-совместимо) |
+| 8-MOB-3 | `ChatScreen.tsx` — `FlatList` сообщений + NativeWind, confirm-карточки как отдельные bubble-компоненты |
+| 8-MOB-4 | `app/(tabs)/ai-coach/index.tsx` — монтирует `ChatScreen` |
+| 8-MOB-5 | Голосовой ввод через `expo-speech-recognition` (Phase 6+ фича, опционально) |
+
+**Done when:** экран чата открывается из таб-бара; стрим текста работает на устройстве; confirm-карточки блокируют write-действия до подтверждения.
+
+---
+
+### Checklist перехода к следующей итерации
+
+- [ ] `AiConversation/AiMessage/AiToolCall` в схеме и миграции применены
+- [ ] Read-only tools (`search_exercises`, `get_alternatives`, `get_metrics_history`, `get_today_workout`, `recommend_programs`) вызываются моделью и возвращают реальные данные
+- [ ] Write tools (`log_set`, `log_metric`, `assign_program`) никогда не исполняются без явного `confirm` от пользователя
+- [ ] Деструктивные операции (`deleteAllWorkouts` и т.п.) не зарегистрированы как tools вообще
+- [ ] Web: чат стримится, confirm-карточки работают, доступен с любого экрана
+- [ ] Mobile: чат-экран работает аналогично web
+- [ ] Rate-limit и prompt-guard на `/ai/*` включены
+
+---
+
 ## Delivery Summary
 
 | Phase | Output | Est. effort |
@@ -488,4 +585,5 @@ NEXTAUTH_SECRET
 | 5 — Mobile | Expo React Native app | 3–4 days |
 | 6 — Testing | Unit + integration + e2e | 2 days |
 | 7 — CI/CD | 4 workflows + VPS + Vercel + EAS | 1 day |
-| **Total** | | **~16 days** |
+| 8 — AI Coach | ai module (BE) + чат (Web) + чат (Mobile) | 4–5 days |
+| **Total** | | **~20–21 days** |

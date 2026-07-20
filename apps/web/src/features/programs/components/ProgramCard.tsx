@@ -39,11 +39,15 @@ type Props = {
   program: ProgramTemplate & { _score?: number };
   isCurrent?: boolean;       // already the user's active program
   isSaving?: boolean;        // mutation in flight for THIS card
+  locked?: boolean;          // gated behind Pro — visible but not selectable
   onChoose: (id: string) => void;
+  onLockedClick?: (p: ProgramTemplate) => void; // hook for future paywall
   showScore?: boolean;
 };
 
-export function ProgramCard({ program: p, isCurrent, isSaving, onChoose, showScore }: Props) {
+export function ProgramCard({ program: p, isCurrent, isSaving, locked, onChoose, onLockedClick, showScore }: Props) {
+  const isLocked = !!locked && !isCurrent;
+
   return (
     <div
       style={{
@@ -68,6 +72,11 @@ export function ProgramCard({ program: p, isCurrent, isSaving, onChoose, showSco
             {isCurrent && (
               <span style={{ fontSize: 11, background: T.accent, color: "#0d0d12", padding: "2px 8px", borderRadius: 20, fontWeight: 700 }}>
                 Current
+              </span>
+            )}
+            {isLocked && (
+              <span style={{ fontSize: 11, background: T.bgInput, color: T.textMuted, padding: "2px 8px", borderRadius: 20, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                🔒 Pro
               </span>
             )}
             {!isCurrent && showScore && p._score !== undefined && p._score > 0 && (
@@ -131,25 +140,50 @@ export function ProgramCard({ program: p, isCurrent, isSaving, onChoose, showSco
         </div>
       </div>
 
-      {/* Action button — direct choose */}
-      <button
-        onClick={() => !isCurrent && !isSaving && onChoose(p.id)}
-        disabled={isCurrent || isSaving}
-        style={{
-          marginTop: 4,
-          padding: "12px 0",
-          borderRadius: 10,
-          border: "none",
-          cursor: isCurrent ? "default" : isSaving ? "wait" : "pointer",
-          fontSize: 14,
-          fontWeight: 700,
-          background: isCurrent ? T.bgInput : T.accent,
-          color: isCurrent ? T.textMuted : "#0d0d12",
-          transition: "background 0.15s, color 0.15s",
-        }}
-      >
-        {isCurrent ? "✓ Your current program" : isSaving ? "Saving…" : "Choose this program"}
-      </button>
+      {/* Action button */}
+      {isLocked ? (
+        // Gated: visible but inactive — transparent grey. Tap → future paywall.
+        <button
+          onClick={() => onLockedClick?.(p)}
+          style={{
+            marginTop: 4,
+            padding: "12px 0",
+            borderRadius: 10,
+            border: `1px solid ${T.border}`,
+            cursor: onLockedClick ? "pointer" : "default",
+            fontSize: 14,
+            fontWeight: 700,
+            background: "transparent",
+            color: T.textMuted,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            transition: "background 0.15s, color 0.15s, border-color 0.15s",
+          }}
+        >
+          <span style={{ fontSize: 13 }}>🔒</span> Unlock program choice
+        </button>
+      ) : (
+        <button
+          onClick={() => !isCurrent && !isSaving && onChoose(p.id)}
+          disabled={isCurrent || isSaving}
+          style={{
+            marginTop: 4,
+            padding: "12px 0",
+            borderRadius: 10,
+            border: "none",
+            cursor: isCurrent ? "default" : isSaving ? "wait" : "pointer",
+            fontSize: 14,
+            fontWeight: 700,
+            background: isCurrent ? T.bgInput : T.accent,
+            color: isCurrent ? T.textMuted : "#0d0d12",
+            transition: "background 0.15s, color 0.15s",
+          }}
+        >
+          {isCurrent ? "✓ Your current program" : isSaving ? "Saving…" : "Choose this program"}
+        </button>
+      )}
     </div>
   );
 }
