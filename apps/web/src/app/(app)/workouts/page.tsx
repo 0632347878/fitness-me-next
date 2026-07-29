@@ -146,7 +146,7 @@ export default function WorkoutsPage() {
             title={t.workouts.noWorkouts}
             body={t.workouts.noWorkoutsBody}
             action={
-              <FmBtn size="lg" loading={starting || isFetching} onClick={() => setPickingExercise(true)}>
+              <FmBtn size="lg" loading={starting} onClick={() => setPickingExercise(true)}>
                 <Icon.Plus s={18} c="#0d0d12" /> {t.workouts.startFirstWorkout}
               </FmBtn>
             }
