@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Barlow_Condensed, DM_Sans } from "next/font/google";
 import { cookies } from "next/headers";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { Providers } from "@/lib/providers";
 
@@ -47,6 +48,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <Providers initialTheme={theme as "light" | "dark"}>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );
