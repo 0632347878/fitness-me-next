@@ -29,7 +29,7 @@ export type ProgramTemplate = {
 };
 
 export type RecReason = "LEVEL_MATCH" | "LEVEL_OK" | "DAYS_EXACT" | "DAYS_RANGE" | "SPORT_FIT";
-export type RecommendedProgram = ProgramTemplate & { _score: number; _reasons: RecReason[] };
+export type RecommendedProgram = ProgramTemplate & { _score: number; _levelRank: number; _reasons: RecReason[] };
 
 export type RecommendParams = {
   experienceLevel: ExperienceLevel;

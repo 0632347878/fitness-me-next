@@ -320,10 +320,13 @@ export function OnboardingWizard() {
             ) : (
               <div className={s.colList}>
                 {(recommended ?? []).map((p, i) => {
-                  // Top-3 by _score (backend already sorts desc) get a badge.
-                  // A 0-score item isn't a real match, so it stays unlabelled.
+                  // Badge only for level-appropriate programs (exact match or one
+                  // below). A lower-level program can appear in the list — sorted to
+                  // the bottom by _levelRank — but never gets a badge.
+                  const levelOk =
+                    p._reasons.includes("LEVEL_MATCH") || p._reasons.includes("LEVEL_OK");
                   const badge =
-                    p._score > 0 && i < 3
+                    i < 3 && levelOk
                       ? i === 0
                         ? (lang === "ru" ? "Лучший матч" : "Best match")
                         : (lang === "ru" ? "Рекомендуем" : "Recommended")
