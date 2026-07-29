@@ -5,6 +5,83 @@
   flex-direction: column;
 }
 
+/* Guided (primary) CTA */
+.guidedCta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--fm-accent);
+  background: linear-gradient(135deg, rgba(232,133,74,0.12), rgba(232,133,74,0.04));
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.guidedCta:hover { filter: brightness(1.05); }
+.guidedCta:disabled { opacity: 0.6; cursor: default; }
+.guidedCtaMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.guidedCtaEyebrow {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fm-accent);
+}
+.guidedCtaTitle {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--fm-text-primary);
+}
+.guidedCtaMeta {
+  font-size: 12px;
+  color: var(--fm-text-sub);
+}
+.guidedCtaGo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--fm-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 800;
+  color: #0d0d12;
+}
+
+/* Freestyle (secondary) CTA */
+.freestyleCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px;
+  border-radius: 14px;
+  border: 1px solid var(--fm-border);
+  background: var(--fm-bg-card);
+  color: var(--fm-text-sub);
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.freestyleCta:hover {
+  border-color: var(--fm-text-muted);
+  color: var(--fm-text-primary);
+}
+
 .modalOverlay {
   position: fixed;
   inset: 0;

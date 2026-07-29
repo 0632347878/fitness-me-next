@@ -56,23 +56,14 @@ export async function getEquipmentList(): Promise<string[]> {
   return res.data;
 }
 
+/** `equipment` is required on purpose — a silent default is how "No equipment?"
+ *  ended up serving dumbbell exercises. The caller must state what it means. */
 export async function getAlternatives(
   id: string,
-  equipment = "DUMBBELL",
+  equipment: string,
 ): Promise<Exercise[]> {
   const res = await apiClient.get<Exercise[]>(`/exercises/${id}/alternatives`, {
     params: { equipment },
-  });
-  return res.data;
-}
-
-export async function getCalories(
-  id: string,
-  weightKg: number,
-  minutes: number,
-): Promise<{ totalKcal: number; kcalPerMin: number } | null> {
-  const res = await apiClient.get(`/exercises/${id}/calories`, {
-    params: { weightKg, minutes },
   });
   return res.data;
 }
@@ -124,23 +115,3 @@ export async function setAlternatives(
 
 // ─── Admin Sync ───────────────────────────────────────────────────────────────
 
-export type SyncStatus = {
-  syncing: boolean;
-  lastResult: {
-    created: number;
-    updated: number;
-    total: number;
-    errors: number;
-    finishedAt: string;
-  } | null;
-};
-
-export async function startWorkoutXSync(): Promise<{ syncing: boolean; message: string }> {
-  const res = await apiClient.post("/exercises/sync/workoutx");
-  return res.data;
-}
-
-export async function getSyncStatus(): Promise<SyncStatus> {
-  const res = await apiClient.get<SyncStatus>("/exercises/sync/workoutx/status");
-  return res.data;
-}

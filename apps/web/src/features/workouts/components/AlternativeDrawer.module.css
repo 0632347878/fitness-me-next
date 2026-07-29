@@ -55,6 +55,43 @@
   color: var(--fm-text-primary);
 }
 
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.chip {
+  font-size: 11px;
+  font-family: var(--font-barlow-condensed);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fm-text-muted);
+  background: transparent;
+  border: 1px solid var(--fm-border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.chip:hover {
+  color: var(--fm-text-primary);
+  border-color: var(--fm-text-muted);
+}
+.chipActive,
+.chipActive:hover {
+  color: var(--fm-accent);
+  border-color: var(--fm-accent);
+  background: var(--fm-accent-dim);
+}
+
+.injuryNote {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--fm-accent);
+}
+
 .list {
   flex: 1;
   overflow-y: auto;

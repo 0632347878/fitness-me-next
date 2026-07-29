@@ -19,7 +19,8 @@ export function useRegister() {
       // Persist tokens client-side
       sessionStorage.setItem("accessToken", data.accessToken);
       sessionStorage.setItem("refreshToken", data.refreshToken);
-      router.push("/dashboard");
+      // New account has no profile yet — onboarding collects it before the app.
+      router.push("/onboarding");
     },
   });
 }

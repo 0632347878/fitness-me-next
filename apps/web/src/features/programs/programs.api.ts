@@ -46,6 +46,8 @@ export type UserProfile = {
   preferDumbbell: boolean;
   sport: string | null;
   targetDate: string | null;
+  heightCm: number | null;
+  weightKg: number | null;
   programTemplate: ProgramTemplate | null;
 };
 
@@ -56,6 +58,8 @@ export type UpdateProfileInput = Partial<{
   injuryFlags: string[];
   preferDumbbell: boolean;
   targetDate: string;
+  heightCm: number;
+  weightKg: number;
 }>;
 
 // ─── Programs ─────────────────────────────────────────────────────────────────

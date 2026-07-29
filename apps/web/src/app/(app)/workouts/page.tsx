@@ -2,12 +2,14 @@
 
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import {
   getWorkouts, startWorkout,
   type WorkoutSession,
   type WorkoutHistory,
 } from "@/features/workouts/workouts.api";
 import { getExercises } from "@/features/exercises/exercises.api";
+import { useTodayWorkout, useStartTodayWorkout } from "@/features/plans/hooks/usePlans";
 import { Icon, FmBtn, FmPageLoader, FmEmpty, FmExercisePicker, AppHeader } from "@/components/fm";
 import { WorkoutHistoryCard } from "@/features/workouts/components/WorkoutHistoryCard";
 import { groupByWorkoutWindow } from "@/features/workouts/workouts.utils";
@@ -19,6 +21,7 @@ import s from "./page.module.css";
 // ─── Page ──────────────────────────────────────────────────────────────────────
 export default function WorkoutsPage() {
   const qc = useQueryClient();
+  const router = useRouter();
   const [pickingExercise, setPickingExercise] = useState(false);
   const [startExerciseId, setStartExerciseId] = useState("");
   const lastStartExerciseId = useRef("");
@@ -26,11 +29,15 @@ export default function WorkoutsPage() {
   const t = useT();
   const { open: openSettings } = useSettings();
 
-  const { data: workoutsData, isLoading, isFetching } = useQuery({
+  const { data: workoutsData, isLoading } = useQuery({
     queryKey: ["workouts"],
     queryFn: getWorkouts,
   });
   const workouts: WorkoutSession[] = workoutsData ?? [];
+
+  // Guided flow is primary: if there's a plan for today, offer it first.
+  const { data: today } = useTodayWorkout();
+  const startToday = useStartTodayWorkout();
 
   const { data: exData } = useQuery({
     queryKey: ["exercises-all", lang],
@@ -53,6 +60,11 @@ export default function WorkoutsPage() {
     },
   });
 
+  async function handleStartGuided() {
+    const session = await startToday.mutateAsync();
+    router.push(`/workouts/${session.id}`);
+  }
+
   if (isLoading) return <FmPageLoader />;
 
   const ongoing: WorkoutSession | undefined = workouts.find((w) => !w.finishedAt);
@@ -65,11 +77,6 @@ export default function WorkoutsPage() {
       <AppHeader
         title={t.workouts.title}
         onAccountClick={openSettings}
-        right={!ongoing ? (
-          <FmBtn size="sm" loading={starting || isFetching} onClick={() => setPickingExercise(true)}>
-            <Icon.Plus s={14} c="#0d0d12" /> {t.workouts.start}
-          </FmBtn>
-        ) : undefined}
       />
 
       {/* Start modal */}
@@ -93,6 +100,36 @@ export default function WorkoutsPage() {
       )}
 
       <div className={s.content}>
+        {/* Guided is primary: today's plan gets the prominent CTA */}
+        {!ongoing && today && !today.alreadyStarted && (
+          <button className={s.guidedCta} onClick={handleStartGuided} disabled={startToday.isPending}>
+            <div className={s.guidedCtaMain}>
+              <span className={s.guidedCtaEyebrow}>
+                {lang === "ru" ? `Неделя ${today.currentWeek} · по плану` : `Week ${today.currentWeek} · on plan`}
+              </span>
+              <span className={s.guidedCtaTitle}>{today.dayLabel}</span>
+              <span className={s.guidedCtaMeta}>
+                {today.exercises.length} {lang === "ru" ? "упражнений" : "exercises"}
+              </span>
+            </div>
+            <span className={s.guidedCtaGo}>
+              {startToday.isPending ? "…" : <Icon.Bolt s={16} c="#0d0d12" />}
+            </span>
+          </button>
+        )}
+
+        {/* Freestyle is the secondary, off-plan option */}
+        {!ongoing && (
+          <button className={s.freestyleCta} onClick={() => setPickingExercise(true)}>
+            <Icon.Plus s={15} c={"currentColor"} />
+            <span>
+              {today && !today.alreadyStarted
+                ? (lang === "ru" ? "Тренировка вне плана" : "Off-plan workout")
+                : (lang === "ru" ? "Свободная тренировка" : "Freestyle workout")}
+            </span>
+          </button>
+        )}
+
         {ongoing && (
           <SetLogger
             key={ongoing.id}

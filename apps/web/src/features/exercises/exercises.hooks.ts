@@ -4,13 +4,10 @@ import {
   getExercise,
   getEquipmentList,
   getAlternatives,
-  getCalories,
   createExercise,
   updateExercise,
   deleteExercise,
   setAlternatives,
-  startWorkoutXSync,
-  getSyncStatus,
   type ExercisesQuery,
   type CreateExercisePayload,
 } from "./exercises.api";
@@ -20,9 +17,7 @@ import {
 const EX_LIST = (q: ExercisesQuery) => ["exercises", q] as const;
 const EX_ONE  = (id: string)         => ["exercises", id] as const;
 const EX_ALT  = (id: string, eq: string) => ["exercises", id, "alternatives", eq] as const;
-const EX_CAL  = (id: string, kg: number, min: number) => ["exercises", id, "calories", kg, min] as const;
 const EQ_LIST = ["exercises", "equipment"] as const;
-const SYNC_STATUS = ["exercises", "sync", "status"] as const;
 
 // ─── Public hooks ─────────────────────────────────────────────────────────────
 
@@ -62,21 +57,12 @@ export function useEquipmentList() {
   });
 }
 
-export function useAlternatives(exerciseId: string, equipment = "DUMBBELL") {
+export function useAlternatives(exerciseId: string, equipment: string) {
   return useQuery({
     queryKey: EX_ALT(exerciseId, equipment),
     queryFn: () => getAlternatives(exerciseId, equipment),
-    enabled: !!exerciseId,
+    enabled: !!exerciseId && !!equipment,
     staleTime: 24 * 60 * 60_000,
-  });
-}
-
-export function useCalories(exerciseId: string, weightKg: number, minutes: number) {
-  return useQuery({
-    queryKey: EX_CAL(exerciseId, weightKg, minutes),
-    queryFn: () => getCalories(exerciseId, weightKg, minutes),
-    enabled: !!exerciseId && weightKg > 0 && minutes > 0,
-    staleTime: Infinity,
   });
 }
 
@@ -119,22 +105,3 @@ export function useSetAlternatives(id: string) {
 
 // ─── Sync hooks ───────────────────────────────────────────────────────────────
 
-export function useSyncStatus() {
-  return useQuery({
-    queryKey: SYNC_STATUS,
-    queryFn: getSyncStatus,
-    // Poll every 3s while sync is running
-    refetchInterval: (query) => (query.state.data?.syncing ? 3000 : false),
-  });
-}
-
-export function useStartSync() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: startWorkoutXSync,
-    onSuccess: () => {
-      // Start polling immediately
-      qc.invalidateQueries({ queryKey: SYNC_STATUS });
-    },
-  });
-}

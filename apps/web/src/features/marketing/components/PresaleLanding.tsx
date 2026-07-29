@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { FmStyles } from "@/components/fm";
 import s from "./PresaleLanding.module.css";
@@ -168,9 +168,60 @@ function PricingCard({
   );
 }
 
+// ─── Scroll parallax + reveal ─────────────────────────────────────────────────
+// Sets --sy (scrollY in px) on the root for CSS-driven parallax, and reveals
+// sections as they enter the viewport. Both disabled under reduced-motion.
+function useScrollAtmosphere(rootRef: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Reveal-on-scroll for every [data-reveal] element.
+    const revealEls = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"));
+    if (reduced) {
+      revealEls.forEach((el) => el.setAttribute("data-shown", "true"));
+    } else {
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              e.target.setAttribute("data-shown", "true");
+              io.unobserve(e.target);
+            }
+          }
+        },
+        { threshold: 0.15, rootMargin: "0px 0px -8% 0px" },
+      );
+      revealEls.forEach((el) => io.observe(el));
+
+      // Parallax: write scrollY into a CSS var, rAF-throttled.
+      let raf = 0;
+      const onScroll = () => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          root.style.setProperty("--sy", `${window.scrollY}px`);
+          raf = 0;
+        });
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+
+      return () => {
+        io.disconnect();
+        window.removeEventListener("scroll", onScroll);
+        if (raf) cancelAnimationFrame(raf);
+      };
+    }
+  }, [rootRef]);
+}
+
 // ─── Page ───────────────────────────────────────────────────────────────────
 export function PresaleLanding() {
   const foundingLink = process.env.NEXT_PUBLIC_STRIPE_FOUNDING_LINK;
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  useScrollAtmosphere(rootRef);
 
   function goFounding() {
     if (foundingLink) {
@@ -181,8 +232,17 @@ export function PresaleLanding() {
   }
 
   return (
-    <div className={s.page}>
+    <div className={s.page} ref={rootRef}>
       <FmStyles />
+
+      {/* Atmospheric background — fixed, behind everything, parallax via --sy */}
+      <div className={s.bg} aria-hidden="true">
+        <div className={clsx(s.orb, s.orb1)} />
+        <div className={clsx(s.orb, s.orb2)} />
+        <div className={clsx(s.orb, s.orb3)} />
+        <div className={s.grain} />
+        <div className={s.vignette} />
+      </div>
 
       {/* Nav */}
       <div className={s.nav}>
@@ -196,21 +256,23 @@ export function PresaleLanding() {
 
       {/* Hero */}
       <div className={s.hero}>
-        <span className={s.heroBadge}>
+        <span className={clsx(s.heroBadge, s.heroFloat)} data-depth="1">
           Building in public · founding spots open
         </span>
-        <h1 className={s.heroTitle}>
+        <h1 className={clsx(s.heroTitle, s.heroFloat)} data-depth="2">
           Train smarter.
           <br />
           Log every rep.
         </h1>
-        <p className={s.heroSubtitle}>
+        <p className={clsx(s.heroSubtitle, s.heroFloat)} data-depth="1">
           Repwise pairs a science-backed program (push/pull/legs, upper/lower, and more) with a
           bilingual exercise library built for real lifters — and adapts as your equipment,
           injuries, and goals change.
         </p>
 
-        <SetLogTicker />
+        <div className={s.heroFloat} data-depth="3">
+          <SetLogTicker />
+        </div>
 
         <div className={s.heroCtaRow}>
           <button onClick={goFounding} className={s.heroPrimaryCta}>
@@ -235,26 +297,34 @@ export function PresaleLanding() {
 
       {/* Features */}
       <div className={s.featuresGrid}>
-        <FeatureCard
-          title="Science-backed programs"
-          body="Choose from proven structures — full body, upper/lower, push/pull/legs — each with honest pros, cons, and who it's actually for."
-        />
-        <FeatureCard
-          title="A library that knows you"
-          body="Every exercise is tagged by muscle group, equipment, and injury risk, with alternatives ready when something doesn't work for your body."
-        />
-        <FeatureCard
-          title="Bilingual from day one"
-          body="Search and log in English or Russian — the exercise library and workout logger both understand you either way."
-        />
-        <FeatureCard
-          title="Track what matters"
-          body="Sets, reps, load, RPE, and body metrics in one place, with the data feeding back into how your plan adapts week to week."
-        />
+        <div data-reveal style={{ transitionDelay: "0ms" }}>
+          <FeatureCard
+            title="Science-backed programs"
+            body="Choose from proven structures — full body, upper/lower, push/pull/legs — each with honest pros, cons, and who it's actually for."
+          />
+        </div>
+        <div data-reveal style={{ transitionDelay: "80ms" }}>
+          <FeatureCard
+            title="A library that knows you"
+            body="Every exercise is tagged by muscle group, equipment, and injury risk, with alternatives ready when something doesn't work for your body."
+          />
+        </div>
+        <div data-reveal style={{ transitionDelay: "160ms" }}>
+          <FeatureCard
+            title="Bilingual from day one"
+            body="Search and log in English or Russian — the exercise library and workout logger both understand you either way."
+          />
+        </div>
+        <div data-reveal style={{ transitionDelay: "240ms" }}>
+          <FeatureCard
+            title="Track what matters"
+            body="Sets, reps, load, RPE, and body metrics in one place, with the data feeding back into how your plan adapts week to week."
+          />
+        </div>
       </div>
 
       {/* Pricing */}
-      <div id="pricing" className={s.pricingWrap}>
+      <div id="pricing" className={s.pricingWrap} data-reveal>
         <h2 className={s.pricingTitle}>
           Founding pricing, locked in
         </h2>
@@ -293,7 +363,7 @@ export function PresaleLanding() {
       </div>
 
       {/* Waitlist */}
-      <div id="waitlist" className={s.waitlistWrap}>
+      <div id="waitlist" className={s.waitlistWrap} data-reveal>
         <h2 className={s.waitlistTitle}>
           Not ready to pay? Just get notified.
         </h2>

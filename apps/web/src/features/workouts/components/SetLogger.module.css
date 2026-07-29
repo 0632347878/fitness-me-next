@@ -233,6 +233,87 @@
   color: var(--fm-accent);
 }
 
+/* Guided prescribed slots */
+.guidedHeader {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.guidedLabel {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fm-text-primary);
+}
+
+.slotList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--fm-border);
+  background: var(--fm-bg-card);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+.slot:hover {
+  border-color: var(--fm-text-muted);
+}
+.slotActive {
+  border-color: var(--fm-accent);
+  background: rgba(232, 133, 74, 0.06);
+}
+.slotComplete {
+  opacity: 0.6;
+}
+
+.slotMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.slotName {
+  font-family: var(--font-dm-sans, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fm-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.slotRx {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--fm-text-sub);
+}
+.slotProgress {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--fm-text-muted);
+  flex-shrink: 0;
+  min-width: 30px;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 /* Logged summary */
 .loggedSection {
   border-top: 1px solid var(--fm-border);

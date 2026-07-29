@@ -11,16 +11,43 @@ export type WorkoutSet = {
   exercise: Pick<Exercise, "id" | "name" | "category">;
 };
 
+export type WorkoutKind = "guided" | "freestyle";
+
 export type WorkoutSession = {
   id: string;
   startedAt: string;
   finishedAt: string | null;
   notes: string | null;
+  kind: WorkoutKind;
+  planDayId: string | null;
   sets: WorkoutSet[];
 };
 
 /** A finished (historical) workout session. finishedAt is guaranteed non-null. */
 export type WorkoutHistory = WorkoutSession & { finishedAt: string };
+
+/** One prescribed slot from the plan day (guided sessions only). */
+export type PrescribedSlot = {
+  exerciseId: string;
+  name: string;
+  nameRu: string | null;
+  category: string;
+  muscleGroups: string[];
+  order: number;
+  sets: number;
+  repsMin: number;
+  repsMax: number;
+  rpe: number | null;
+  restSec: number;
+  targetWeight: number | null;
+  notes: string | null;
+};
+
+/** Single-session fetch: carries the guided extras the list endpoint omits. */
+export type WorkoutSessionDetail = WorkoutSession & {
+  planLabel: string | null;
+  prescribed: PrescribedSlot[];
+};
 
 export type CreateSetInput = {
   exerciseId: string;
@@ -29,10 +56,20 @@ export type CreateSetInput = {
   weight?: number;
   duration?: number;
   rpe?: number;
+  isAlternative?: boolean;
+  substituteFor?: string;
 };
 
-export async function startWorkout(notes?: string): Promise<WorkoutSession> {
-  const res = await apiClient.post<WorkoutSession>("/workouts", { notes });
+/**
+ * Start a session. Pass planDayId to begin the guided workout for that plan day;
+ * omit it for a freestyle (off-plan) session. The backend is idempotent for a
+ * guided day already started today — it returns the existing session.
+ */
+export async function startWorkout(opts?: { notes?: string; planDayId?: string }): Promise<WorkoutSession> {
+  const res = await apiClient.post<WorkoutSession>("/workouts", {
+    notes: opts?.notes,
+    planDayId: opts?.planDayId,
+  });
   return res.data;
 }
 
@@ -41,8 +78,8 @@ export async function getWorkouts(): Promise<WorkoutSession[]> {
   return res.data;
 }
 
-export async function getWorkout(id: string): Promise<WorkoutSession> {
-  const res = await apiClient.get<WorkoutSession>(`/workouts/${id}`);
+export async function getWorkout(id: string): Promise<WorkoutSessionDetail> {
+  const res = await apiClient.get<WorkoutSessionDetail>(`/workouts/${id}`);
   return res.data;
 }
 

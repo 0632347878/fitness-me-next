@@ -102,10 +102,13 @@ function ExerciseRow({ ex, index }: { ex: PrescribedExercise; index: number }) {
   const { sets, repsMin, repsMax, rpe, restSec } = ex.prescribed;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [overrideEx, setOverrideEx] = useState<Exercise | null>(null);
+  const [gifFailed, setGifFailed] = useState(false);
 
   const displayName = overrideEx ? (overrideEx.nameRu ?? overrideEx.name) : ex.name;
   const displayMuscles = overrideEx ? overrideEx.muscleGroups : ex.muscleGroups;
   const isSubstituted = !!overrideEx;
+  const gifUrl = overrideEx?.gifUrl ?? ex.gifUrl;
+  const showGif = !!gifUrl && !gifFailed;
 
   const handleSelect = (alt: Exercise) => {
     setOverrideEx(alt);
@@ -114,21 +117,26 @@ function ExerciseRow({ ex, index }: { ex: PrescribedExercise; index: number }) {
   return (
     <>
       <div className={clsx(s.row, isSubstituted && s.substituted)}>
-        {/* GIF thumbnail if available */}
-        {(overrideEx?.gifUrl ?? ex.gifUrl) && (
-          <img
-            src={overrideEx?.gifUrl ?? ex.gifUrl!}
-            alt={displayName}
-            className={s.thumb}
-          />
-        )}
-
-        {/* Index bubble (shown when no gif) */}
-        {!(overrideEx?.gifUrl ?? ex.gifUrl) && (
-          <div className={s.indexBubble}>
-            <span>{index + 1}</span>
-          </div>
-        )}
+        {/*
+          Media slot — always the same 48×48 box with the same ordinal badge,
+          whether or not a GIF exists. Previously a missing GIF swapped in a
+          smaller numbered bubble, so rows in one list didn't line up.
+        */}
+        <div className={s.media}>
+          {showGif ? (
+            <img
+              src={gifUrl!}
+              alt={displayName}
+              className={s.thumb}
+              onError={() => setGifFailed(true)}
+            />
+          ) : (
+            <span className={s.mediaFallback} aria-hidden="true">
+              🏋️
+            </span>
+          )}
+          <span className={s.mediaIndex}>{index + 1}</span>
+        </div>
 
         {/* Info */}
         <div className={s.info}>
@@ -151,13 +159,14 @@ function ExerciseRow({ ex, index }: { ex: PrescribedExercise; index: number }) {
         <div className={s.rightCol}>
           <p className={s.setsReps}>
             {sets} × {repsMin === repsMax ? repsMin : `${repsMin}–${repsMax}`}
+            {ex.prescribed.targetWeight ? ` @ ${ex.prescribed.targetWeight}kg` : ""}
           </p>
           <p className={s.rpeRest}>
             {rpe ? `RPE ${rpe}` : ""}{rpe && restSec ? " · " : ""}{restSec ? `${restSec}s` : ""}
           </p>
-          {/* No equipment button */}
-          <button onClick={() => setDrawerOpen(true)} className={s.noEquipBtn}>
-            ⚡ No equip
+          {/* Swap — opens same-pattern alternatives for the equipment you have */}
+          <button onClick={() => setDrawerOpen(true)} className={s.swapBtn}>
+            ⇄ Swap
           </button>
         </div>
       </div>

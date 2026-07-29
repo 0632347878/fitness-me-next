@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getExercises } from "@/features/exercises/exercises.api";
 import { T, Icon, FmBtn, FmBadge, FmExercisePicker } from "@/components/fm";
 import { useLang, useT } from "@/lib/lang-context";
-import { logSets, finishWorkout, type WorkoutSession, type WorkoutSet } from "../workouts.api";
+import { logSets, finishWorkout, type WorkoutSession, type WorkoutSet, type PrescribedSlot } from "../workouts.api";
 import { groupSetsByExercise, type ExerciseGroup } from "../workouts.utils";
 import { NoteModal } from "./NoteModal";
 import { HistoryPanel } from "./HistoryPanel";
@@ -105,7 +105,9 @@ function SetRow({ row, index, onChange, onRemove, isNew }: {
 // ─── SetLogger ─────────────────────────────────────────────────────────────────
 
 interface SetLoggerProps {
-  session: WorkoutSession;
+  // Accepts both the list shape (freestyle inline) and the detail shape
+  // (guided, from /workouts/[id]). prescribed/kind are read defensively.
+  session: WorkoutSession & { planLabel?: string | null; prescribed?: PrescribedSlot[] };
   allSessions: WorkoutSession[];
   initialExerciseId?: string;
   onDone: () => void;
@@ -118,8 +120,14 @@ export function SetLogger({ session, allSessions, initialExerciseId, onDone }: S
   const t = useT();
   const nextId = useRef(100);
 
+  const prescribed = session.prescribed ?? [];
+  const isGuided = session.kind === "guided" && prescribed.length > 0;
+
   const [exerciseId, setExerciseId] = useState(initialExerciseId ?? "");
   const [exerciseName, setExerciseName] = useState("");
+  // Which prescribed slot is being logged right now (guided only). Holds the
+  // original prescribed exerciseId, so a swap can record substituteFor.
+  const [activeSlotId, setActiveSlotId] = useState<string | null>(null);
   const [rows, setRows] = useState<RowState[]>([
     { id: 1, setNumber: 1, weight: null, reps: null, done: false },
   ]);
@@ -157,6 +165,7 @@ export function SetLogger({ session, allSessions, initialExerciseId, onDone }: S
 
   function handleExerciseChange(id: string) {
     setExerciseId(id);
+    setActiveSlotId(null);
     const ex = exercises.find((e) => e.id === id);
     setExerciseName(ex?.name ?? "");
     const existingCount = session.sets.filter((s) => s.exercise.id === id).length;
@@ -164,12 +173,46 @@ export function SetLogger({ session, allSessions, initialExerciseId, onDone }: S
     setNote("");
   }
 
+  // Guided: tap a prescribed slot → seed one row per prescribed set, reps
+  // pre-filled to the target so the user only fills weight and confirms.
+  function handleSelectPrescribed(slot: PrescribedSlot) {
+    setExerciseId(slot.exerciseId);
+    setActiveSlotId(slot.exerciseId);
+    setExerciseName(lang === "ru" ? (slot.nameRu ?? slot.name) : slot.name);
+    const existingCount = session.sets.filter((s) => s.exercise.id === slot.exerciseId).length;
+    const seeded: RowState[] = Array.from({ length: Math.max(1, slot.sets) }, (_, i) => ({
+      id: nextId.current++,
+      setNumber: existingCount + i + 1,
+      weight: slot.targetWeight ?? null,
+      reps: slot.repsMin,
+      done: false,
+    }));
+    setRows(seeded);
+    setNote("");
+  }
+
+  // How many sets already logged per prescribed exercise — drives the progress
+  // pips in the guided list.
+  const loggedCountByExercise = new Map<string, number>();
+  for (const st of session.sets) {
+    loggedCountByExercise.set(st.exercise.id, (loggedCountByExercise.get(st.exercise.id) ?? 0) + 1);
+  }
+
   const { mutate: logSet, isPending: logging } = useMutation({
     mutationFn: () => logSets(
       session.id,
       rows
         .filter((r) => r.done || r.weight != null || r.reps != null)
-        .map((r) => ({ setNumber: r.setNumber, reps: r.reps ?? undefined, weight: r.weight ?? undefined, exerciseId }))
+        .map((r) => ({
+          setNumber: r.setNumber,
+          reps: r.reps ?? undefined,
+          weight: r.weight ?? undefined,
+          exerciseId,
+          // Guided + logging a different exercise than the slot = a swap.
+          ...(activeSlotId && activeSlotId !== exerciseId
+            ? { isAlternative: true, substituteFor: activeSlotId }
+            : {}),
+        }))
     ),
     onSuccess: (data) => {
       const maxSet = data.length > 0 ? Math.max(...data.map((s) => s.setNumber)) : rows.length;
@@ -222,7 +265,52 @@ export function SetLogger({ session, allSessions, initialExerciseId, onDone }: S
       </div>
 
       <div className={styles.body}>
-        <FmExercisePicker value={exerciseId} onChange={handleExerciseChange} exercises={exercises} recentIds={recentIds} />
+        {isGuided ? (
+          <>
+            {/* Guided: the plan day's prescribed exercises */}
+            {session.planLabel && (
+              <div className={styles.guidedHeader}>
+                <Icon.Chart s={14} c={T.accent} />
+                <span className={styles.guidedLabel}>{session.planLabel}</span>
+              </div>
+            )}
+            <div className={styles.slotList}>
+              {prescribed.map((slot) => {
+                const logged = loggedCountByExercise.get(slot.exerciseId) ?? 0;
+                const active = activeSlotId === slot.exerciseId;
+                const complete = logged >= slot.sets;
+                return (
+                  <button
+                    key={slot.exerciseId}
+                    type="button"
+                    onClick={() => handleSelectPrescribed(slot)}
+                    className={[
+                      styles.slot,
+                      active ? styles.slotActive : "",
+                      complete ? styles.slotComplete : "",
+                    ].filter(Boolean).join(" ")}
+                  >
+                    <div className={styles.slotMain}>
+                      <span className={styles.slotName}>
+                        {lang === "ru" ? (slot.nameRu ?? slot.name) : slot.name}
+                      </span>
+                      <span className={styles.slotRx}>
+                        {slot.sets} × {slot.repsMin === slot.repsMax ? slot.repsMin : `${slot.repsMin}–${slot.repsMax}`}
+                        {slot.targetWeight ? ` @ ${slot.targetWeight}${lang === "ru" ? " кг" : " kg"}` : ""}
+                        {slot.rpe ? ` · RPE ${slot.rpe}` : ""}
+                      </span>
+                    </div>
+                    <span className={styles.slotProgress}>
+                      {complete ? <Icon.Check s={15} c={T.success} /> : `${logged}/${slot.sets}`}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <FmExercisePicker value={exerciseId} onChange={handleExerciseChange} exercises={exercises} recentIds={recentIds} />
+        )}
 
         {exerciseId && (
           <>

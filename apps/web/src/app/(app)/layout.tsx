@@ -8,6 +8,8 @@ import { Icon, FmStyles } from "@/components/fm";
 import { useLang, useT } from "@/lib/lang-context";
 import { SettingsProvider, useSettings } from "@/lib/settings-context";
 import { AccountPopup } from "@/features/settings";
+import { useUserProfile } from "@/features/programs";
+import { isOnboardingComplete } from "@/features/onboarding";
 import s from "./layout.module.css";
 
 
@@ -25,6 +27,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const { lang } = useLang();
   const t = useT();
   const { open: openSettings } = useSettings();
+  const { data: profile, isLoading: profileLoading } = useUserProfile();
 
   const TABS = [
     { href: "/dashboard", label: t.nav.home,      IconComp: Icon.Home },
@@ -42,8 +45,14 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const token = sessionStorage.getItem("accessToken");
-    if (!token) router.replace("/login");
-  }, [router]);
+    if (!token) { router.replace("/login"); return; }
+    // Logged in but hasn't finished onboarding → collect the profile first.
+    // Without this, the injury/equipment filters and plan generation run on an
+    // empty profile.
+    if (!profileLoading && !isOnboardingComplete(profile)) {
+      router.replace("/onboarding");
+    }
+  }, [router, profile, profileLoading]);
 
   return (
     <div className={s.shell}>

@@ -15,6 +15,7 @@ export type PrescribedExercise = {
     repsMax: number;
     rpe: number | null;
     restSec: number;
+    targetWeight: number | null;
   };
   notes: string | null;
   alternatives: { id: string; name: string; nameRu: string | null; equipment: string[] }[];
