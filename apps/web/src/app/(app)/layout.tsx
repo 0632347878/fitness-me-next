@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
-import { Icon, FmStyles } from "@/components/fm";
+import { Icon, FmStyles, FmPageLoader } from "@/components/fm";
 import { useLang, useT } from "@/lib/lang-context";
 import { SettingsProvider, useSettings } from "@/lib/settings-context";
 import { AccountPopup } from "@/features/settings";
@@ -28,6 +28,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const t = useT();
   const { open: openSettings } = useSettings();
   const { data: profile, isLoading: profileLoading } = useUserProfile();
+  const onboardingOk = isOnboardingComplete(profile);
 
   const TABS = [
     { href: "/dashboard", label: t.nav.home,      IconComp: Icon.Home },
@@ -49,10 +50,14 @@ function AppShell({ children }: { children: React.ReactNode }) {
     // Logged in but hasn't finished onboarding → collect the profile first.
     // Without this, the injury/equipment filters and plan generation run on an
     // empty profile.
-    if (!profileLoading && !isOnboardingComplete(profile)) {
+    if (!profileLoading && !onboardingOk) {
       router.replace("/onboarding");
     }
-  }, [router, profile, profileLoading]);
+  }, [router, onboardingOk, profileLoading]);
+
+  // Gate the render until onboarding status is known — otherwise the dashboard
+  // paints for a frame before the redirect above fires (the flicker).
+  if (profileLoading || !onboardingOk) return <FmPageLoader />;
 
   return (
     <div className={s.shell}>

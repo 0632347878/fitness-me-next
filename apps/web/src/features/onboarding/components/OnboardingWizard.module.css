@@ -222,6 +222,44 @@
   color: var(--fm-text-muted);
   flex-shrink: 0;
 }
+.programTopRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.programBadge {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--fm-text-sub);
+  background: var(--fm-border);
+  white-space: nowrap;
+}
+.programBadgeTop {
+  color: #0d0d12;
+  background: var(--fm-accent);
+}
+.programReasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.programReason {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--fm-text-sub);
+  background: rgba(232, 133, 74, 0.08);
+  border: 1px solid var(--fm-border);
+  white-space: nowrap;
+}
 .programDesc {
   font-size: 13px;
   line-height: 1.5;

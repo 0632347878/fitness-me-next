@@ -28,7 +28,8 @@ export type ProgramTemplate = {
   isActive: boolean;
 };
 
-export type RecommendedProgram = ProgramTemplate & { _score: number };
+export type RecReason = "LEVEL_MATCH" | "LEVEL_OK" | "DAYS_EXACT" | "DAYS_RANGE" | "SPORT_FIT";
+export type RecommendedProgram = ProgramTemplate & { _score: number; _reasons: RecReason[] };
 
 export type RecommendParams = {
   experienceLevel: ExperienceLevel;

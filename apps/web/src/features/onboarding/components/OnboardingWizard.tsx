@@ -44,6 +44,19 @@ const EMPTY: Draft = {
   targetDate: null,
 };
 
+// Localised "why this program" chip for a recommendation reason code.
+function reasonLabel(code: string, lang: string, days: number | null): string {
+  const ru = lang === "ru";
+  switch (code) {
+    case "LEVEL_MATCH": return ru ? "Твой уровень" : "Your level";
+    case "LEVEL_OK":    return ru ? "Подходит по уровню" : "Suits your level";
+    case "DAYS_EXACT":  return days ? (ru ? `${days} дней/нед` : `${days} days/wk`) : (ru ? "По дням" : "Days match");
+    case "DAYS_RANGE":  return ru ? "Подходит по дням" : "Days fit";
+    case "SPORT_FIT":   return ru ? "Для твоего спорта" : "For your sport";
+    default:            return code;
+  }
+}
+
 export function OnboardingWizard() {
   const router = useRouter();
   const { lang } = useLang();
@@ -306,19 +319,45 @@ export function OnboardingWizard() {
               <FmPageLoader />
             ) : (
               <div className={s.colList}>
-                {(recommended ?? []).slice(0, 3).map((p) => (
-                  <button
-                    key={p.id}
-                    className={clsx(s.programCard, selectedProgram === p.id && s.cardActive)}
-                    onClick={() => setSelectedProgram(p.id)}
-                  >
-                    <div className={s.programTop}>
-                      <span className={s.programName}>{p.name}</span>
-                      {p.author && <span className={s.programAuthor}>{p.author}</span>}
-                    </div>
-                    <span className={s.programDesc}>{p.description}</span>
-                  </button>
-                ))}
+                {(recommended ?? []).map((p, i) => {
+                  // Top-3 by _score (backend already sorts desc) get a badge.
+                  // A 0-score item isn't a real match, so it stays unlabelled.
+                  const badge =
+                    p._score > 0 && i < 3
+                      ? i === 0
+                        ? (lang === "ru" ? "Лучший матч" : "Best match")
+                        : (lang === "ru" ? "Рекомендуем" : "Recommended")
+                      : null;
+                  return (
+                    <button
+                      key={p.id}
+                      className={clsx(s.programCard, selectedProgram === p.id && s.cardActive)}
+                      onClick={() => setSelectedProgram(p.id)}
+                    >
+                      <div className={s.programTop}>
+                        <span className={s.programName}>{p.name}</span>
+                        <div className={s.programTopRight}>
+                          {badge && (
+                            <span className={clsx(s.programBadge, i === 0 && s.programBadgeTop)}>
+                              {badge}
+                            </span>
+                          )}
+                          {p.author && <span className={s.programAuthor}>{p.author}</span>}
+                        </div>
+                      </div>
+                      <span className={s.programDesc}>{p.description}</span>
+                      {p._reasons?.length > 0 && (
+                        <div className={s.programReasons}>
+                          {p._reasons.map((r) => (
+                            <span key={r} className={s.programReason}>
+                              {reasonLabel(r, lang, draft.daysPerWeek)}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
                 {(recommended ?? []).length === 0 && (
                   <p className={s.dateHint}>
                     {lang === "ru" ? "Нет подходящих программ" : "No matching programs"}
