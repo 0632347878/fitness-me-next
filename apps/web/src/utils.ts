@@ -12,6 +12,23 @@ const LOCAL_GIF_BY_NAME: Record<string, string> = {
     "DB Superman": "/exercises/DB-superman-0.png",
 };
 
+// Native vector overrides. Keep aliases explicit: a generic substring match would
+// accidentally show a floor crunch for cable, machine, or reverse-crunch variants.
+const LOCAL_LOTTIE_BY_NAME: Record<string, string> = {
+    "abdominal crunch": "/exercises/lottie/floor-crunch.json?v=2",
+    "bodyweight crunch": "/exercises/lottie/floor-crunch.json?v=2",
+    "crunch": "/exercises/lottie/floor-crunch.json?v=2",
+    "floor crunch": "/exercises/lottie/floor-crunch.json?v=2",
+    "floor sit-up": "/exercises/lottie/floor-crunch.json?v=2",
+    "sit up": "/exercises/lottie/floor-crunch.json?v=2",
+    "sit-up": "/exercises/lottie/floor-crunch.json?v=2",
+};
+
+export const localLottieUrl = (name?: string | null): string | null => {
+    if (!name) return null;
+    return LOCAL_LOTTIE_BY_NAME[name.trim().toLowerCase()] ?? null;
+};
+
 const NO_IMG = "/no-img.jpg";
 
 /** Есть ли у упражнения локальная картинка в /public (по name). */

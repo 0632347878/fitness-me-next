@@ -57,6 +57,7 @@ export default function WorkoutsPage() {
       setPickingExercise(false);
       setStartExerciseId("");
       qc.invalidateQueries({ queryKey: ["workouts"] });
+      qc.invalidateQueries({ queryKey: ["workouts", "active"] });
     },
   });
 

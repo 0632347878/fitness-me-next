@@ -41,6 +41,7 @@ export function useStartTodayWorkout() {
     mutationFn: startTodayWorkout,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: TODAY_KEY });
+      qc.invalidateQueries({ queryKey: ["workouts", "active"] });
     },
   });
 }

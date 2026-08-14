@@ -3,10 +3,12 @@ import s from "@/app/(app)/exercises/page.module.css";
 import {FmBadge} from "@/components/fm";
 import MuscleChip from "@/components/ui/MuscleChip";
 import ExerciseGif from "@/components/ui/ExerciseGif";
-import { hasLocalGif } from "@/utils";
+import ExerciseLottie from "@/components/ui/ExerciseLottie";
+import { hasLocalGif, localLottieUrl } from "@/utils";
 
 const ExerciseCard = ({ ex, lang, onClick }: { ex: Exercise; lang: string; onClick: () => void })=> {
     const displayName = lang === "ru" ? (ex.nameRu ?? ex.name) : ex.name;
+    const lottieSrc = localLottieUrl(ex.name);
     return (
         <button className={s.card} onClick={onClick}>
             <div className={s.cardTop}>
@@ -22,14 +24,18 @@ const ExerciseCard = ({ ex, lang, onClick }: { ex: Exercise; lang: string; onCli
             {ex.equipment && (
                 <span className={s.cardEquipment}>🏋️ {ex.equipment}</span>
             )}
-            {(ex.gifUrl || hasLocalGif(ex.name)) && (
+            {(lottieSrc || ex.gifUrl || hasLocalGif(ex.name)) && (
                 <div className={s.exerciseCardWrapper}>
-                    <ExerciseGif
-                        className={s.cardGif}
-                        src={ex.gifUrl}
-                        alt={displayName}
-                        name={ex.name}
-                    />
+                    {lottieSrc ? (
+                        <ExerciseLottie className={s.cardGif} src={lottieSrc} label={displayName} />
+                    ) : (
+                        <ExerciseGif
+                            className={s.cardGif}
+                            src={ex.gifUrl}
+                            alt={displayName}
+                            name={ex.name}
+                        />
+                    )}
                 </div>
             )}
         </button>

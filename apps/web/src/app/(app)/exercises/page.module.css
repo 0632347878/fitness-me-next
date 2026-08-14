@@ -250,6 +250,12 @@
   display: block;
 }
 
+.cardGif svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .cardMore {
   font-size: 10px;
   color: var(--fm-text-muted);
@@ -409,4 +415,3 @@
   color: var(--fm-text-sub);
   line-height: 1.65;
 }
-

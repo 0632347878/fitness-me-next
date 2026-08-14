@@ -41,7 +41,13 @@ export function useMyProgram() {
   });
 }
 
-/** Assign program mutation */
+/**
+ * Assign program mutation.
+ * Switching the program invalidates the generated plan on the backend too
+ * (see plans/generate), so /dashboard and /workouts/:id must drop their
+ * cached plan — not just the program itself — or they keep rendering the
+ * previous program's plan until an unrelated refetch happens to occur.
+ */
 export function useAssignProgram() {
   const qc = useQueryClient();
   return useMutation({
@@ -49,6 +55,9 @@ export function useAssignProgram() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: MY_PROGRAM_KEY });
       qc.invalidateQueries({ queryKey: USER_PROFILE_KEY });
+      // Broad "plans" prefix covers both plans.me and plans.me.today.
+      qc.invalidateQueries({ queryKey: ["plans"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
     },
   });
 }

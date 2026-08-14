@@ -154,7 +154,7 @@ export function ProgramsPage() {
       {justSavedId && (
         <div className={s.savedToast}>
           <span className={s.savedToastText}>
-            ✓ Program saved. Generate your plan?
+            ✓ Program saved — your plan has been updated
           </span>
           <FmBtn size="sm" onClick={() => router.push("/dashboard")}>
             Go to plan →

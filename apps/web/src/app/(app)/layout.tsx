@@ -10,6 +10,8 @@ import { SettingsProvider, useSettings } from "@/lib/settings-context";
 import { AccountPopup } from "@/features/settings";
 import { useUserProfile } from "@/features/programs";
 import { isOnboardingComplete } from "@/features/onboarding";
+import { ActiveWorkoutWidget } from "@/features/workouts/components/ActiveWorkoutWidget";
+import { AiCoachWidget } from "@/features/ai-coach";
 import s from "./layout.module.css";
 
 
@@ -69,6 +71,11 @@ function AppShell({ children }: { children: React.ReactNode }) {
       <main className={s.main}>
         {children}
       </main>
+
+      {/* Resume-workout affordance — floats above every page except the
+          active session's own page. */}
+      <ActiveWorkoutWidget />
+      <AiCoachWidget />
 
       {/* Bottom Tab Bar */}
       <nav className={s.tabBar}>

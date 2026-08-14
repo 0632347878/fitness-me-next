@@ -227,6 +227,7 @@ export function SetLogger({ session, allSessions, initialExerciseId, onDone }: S
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["workouts"] });
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      qc.invalidateQueries({ queryKey: ["workouts", "active"] });
       onDone();
     },
   });

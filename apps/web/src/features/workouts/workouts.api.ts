@@ -78,6 +78,20 @@ export async function getWorkouts(): Promise<WorkoutSession[]> {
   return res.data;
 }
 
+export type ActiveWorkout = {
+  id: string;
+  startedAt: string;
+  kind: WorkoutKind;
+  planDayLabel: string | null;
+  setsLogged: number;
+};
+
+/** The current unfinished session, if any — null when nothing is in progress. */
+export async function getActiveWorkout(): Promise<ActiveWorkout | null> {
+  const res = await apiClient.get<ActiveWorkout | null>("/workouts/active");
+  return res.data;
+}
+
 export async function getWorkout(id: string): Promise<WorkoutSessionDetail> {
   const res = await apiClient.get<WorkoutSessionDetail>(`/workouts/${id}`);
   return res.data;
