@@ -1,0 +1,164 @@
+.root {
+  position: fixed;
+  z-index: 95;
+  left: 16px;
+  bottom: 76px;
+  font-family: var(--font-dm-sans, sans-serif);
+}
+
+.launcher {
+  min-width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  color: var(--fm-bg);
+  background: var(--fm-accent);
+  border: 0;
+  border-radius: 26px;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 38%);
+  cursor: pointer;
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  transition: transform 150ms ease, filter 150ms ease;
+}
+
+.launcher:hover { transform: translateY(-2px); filter: brightness(1.05); }
+.launcher:focus-visible, .iconButton:focus-visible, .reset:focus-visible,
+.suggestions button:focus-visible, .composer button:focus-visible, .composer textarea:focus-visible {
+  outline: 2px solid var(--fm-accent-raw);
+  outline-offset: 2px;
+}
+
+.panel {
+  position: absolute;
+  bottom: 62px;
+  left: 0;
+  width: min(390px, calc(100vw - 32px));
+  height: min(590px, calc(100dvh - 160px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--fm-text-primary);
+  background: color-mix(in oklch, var(--fm-bg-card) 97%, var(--fm-accent));
+  border: 1px solid var(--fm-border);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 48%);
+  animation: panelIn 160ms ease-out;
+}
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+}
+
+.header {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--fm-border-light);
+}
+
+.coachIcon, .welcomeIcon, .messageIcon {
+  display: grid;
+  place-items: center;
+  color: var(--fm-accent-raw);
+  background: var(--fm-accent-dim);
+  border: 1px solid var(--fm-accent-mid);
+  border-radius: 50%;
+}
+.coachIcon { width: 38px; height: 38px; flex: 0 0 38px; }
+.heading { min-width: 0; display: flex; flex: 1; flex-direction: column; gap: 2px; }
+.heading strong {
+  font-family: var(--font-barlow-condensed, sans-serif);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.heading small { overflow: hidden; color: var(--fm-text-sub); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.onlineDot { width: 6px; height: 6px; display: inline-block; margin-right: 5px; background: var(--fm-success); border-radius: 50%; }
+
+.reset, .iconButton { color: var(--fm-text-sub); background: none; border: 0; cursor: pointer; }
+.reset { padding: 7px 4px; font-size: 10px; white-space: nowrap; }
+.reset:hover, .iconButton:hover { color: var(--fm-text-primary); }
+.iconButton { width: 30px; height: 30px; font-size: 25px; font-weight: 300; line-height: 1; }
+
+.messages { flex: 1; overflow-y: auto; padding: 16px 12px; }
+.welcome { min-height: 100%; display: flex; align-items: center; flex-direction: column; justify-content: center; padding: 12px; text-align: center; }
+.welcomeIcon { width: 48px; height: 48px; margin-bottom: 12px; }
+.welcome p { max-width: 300px; color: var(--fm-text-sub); font-size: 13px; line-height: 1.55; }
+.suggestions { width: 100%; display: flex; flex-direction: column; gap: 7px; margin-top: 16px; }
+.suggestions button {
+  padding: 9px 11px;
+  color: var(--fm-text-primary);
+  background: var(--fm-bg-input);
+  border: 1px solid var(--fm-border);
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+.suggestions button:hover { background: var(--fm-bg-card-alt); border-color: var(--fm-accent-mid); }
+
+.userRow, .coachRow { display: flex; margin-bottom: 12px; }
+.userRow { justify-content: flex-end; padding-left: 48px; }
+.coachRow { align-items: flex-start; gap: 7px; padding-right: 32px; }
+.userRow p, .coachRow p {
+  padding: 9px 11px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.userRow p { color: var(--fm-bg); background: var(--fm-accent); border-bottom-right-radius: 3px; }
+.coachRow p { background: var(--fm-bg-input); border: 1px solid var(--fm-border-light); border-bottom-left-radius: 3px; }
+.messageIcon { width: 25px; height: 25px; flex: 0 0 25px; margin-top: 2px; }
+.error { margin: 8px 0; padding: 9px 10px; color: var(--fm-danger); background: color-mix(in srgb, var(--fm-danger) 9%, transparent); border-radius: 8px; font-size: 11px; line-height: 1.4; }
+
+.thinking { display: flex; align-items: center; gap: 3px; }
+.thinking span { width: 4px; height: 4px; background: var(--fm-text-sub); border-radius: 50%; animation: pulse 1s infinite alternate; }
+.thinking span:nth-child(2) { animation-delay: 180ms; }
+.thinking span:nth-child(3) { animation-delay: 360ms; }
+.thinking em { margin-left: 5px; color: var(--fm-text-sub); font-size: 10px; font-style: normal; }
+@keyframes pulse { to { opacity: .25; transform: translateY(-2px); } }
+
+.composer { display: flex; align-items: flex-end; gap: 8px; padding: 10px 10px 6px; border-top: 1px solid var(--fm-border-light); }
+.composer textarea {
+  min-height: 40px;
+  max-height: 92px;
+  flex: 1;
+  resize: none;
+  padding: 10px 12px;
+  color: var(--fm-text-primary);
+  background: var(--fm-bg-input);
+  border: 1px solid var(--fm-border);
+  border-radius: 11px;
+  font: inherit;
+  font-size: 12px;
+  line-height: 18px;
+}
+.composer button { width: 40px; height: 40px; display: grid; place-items: center; color: var(--fm-bg); background: var(--fm-accent); border: 0; border-radius: 11px; cursor: pointer; }
+.composer button:disabled { cursor: default; filter: grayscale(.6); opacity: .4; }
+.disclaimer { padding: 0 12px 9px; color: var(--fm-text-muted); font-size: 9px; text-align: center; }
+
+@media (min-width: 720px) {
+  .root { left: 24px; bottom: 80px; }
+}
+
+@media (max-width: 420px) {
+  .launcher { width: 52px; padding: 0; }
+  .launcher span { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel, .thinking span { animation: none; }
+  .launcher { transition: none; }
+}

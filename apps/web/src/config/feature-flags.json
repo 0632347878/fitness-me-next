@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "flags": {
+    "programSwitching": {
+      "enabled": true,
+      "description": "Allow users to change their active training program from /programs"
+    },
+    "ai-coaching": {
+      "enabled": false,
+      "description": "Enable AI coaching features for personalized workout recommendations"
+    }
+  }
+}
