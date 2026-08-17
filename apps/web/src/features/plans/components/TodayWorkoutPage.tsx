@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import clsx from "clsx";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FmBtn, FmPageLoader } from "@/components/fm";
 import { useTodayWorkout, useGeneratePlan, useStartTodayWorkout } from "../hooks/usePlans";
@@ -105,6 +106,7 @@ function ExerciseRow({ ex, index }: { ex: PrescribedExercise; index: number }) {
   const [gifFailed, setGifFailed] = useState(false);
 
   const displayName = overrideEx ? (overrideEx.nameRu ?? overrideEx.name) : ex.name;
+  const displayExerciseId = overrideEx?.id ?? ex.exerciseId;
   const displayMuscles = overrideEx ? overrideEx.muscleGroups : ex.muscleGroups;
   const isSubstituted = !!overrideEx;
   const gifUrl = overrideEx?.gifUrl ?? ex.gifUrl;
@@ -141,9 +143,12 @@ function ExerciseRow({ ex, index }: { ex: PrescribedExercise; index: number }) {
         {/* Info */}
         <div className={s.info}>
           <div className={s.nameRow}>
-            <p className={s.name}>
+            <Link
+              href={`/exercises?exerciseId=${encodeURIComponent(displayExerciseId)}`}
+              className={s.name}
+            >
               {displayName}
-            </p>
+            </Link>
             {isSubstituted && (
               <span className={s.swapBadge}>
                 swap

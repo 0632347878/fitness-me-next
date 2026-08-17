@@ -3,6 +3,7 @@ import {
   getExercises,
   getExercise,
   getEquipmentList,
+  getExerciseFilterOptions,
   getAlternatives,
   createExercise,
   updateExercise,
@@ -18,6 +19,7 @@ const EX_LIST = (q: ExercisesQuery) => ["exercises", q] as const;
 const EX_ONE  = (id: string)         => ["exercises", id] as const;
 const EX_ALT  = (id: string, eq: string) => ["exercises", id, "alternatives", eq] as const;
 const EQ_LIST = ["exercises", "equipment"] as const;
+const FILTER_OPTIONS = ["exercises", "filter-options"] as const;
 
 // ─── Public hooks ─────────────────────────────────────────────────────────────
 
@@ -54,6 +56,14 @@ export function useEquipmentList() {
     queryKey: EQ_LIST,
     queryFn: getEquipmentList,
     staleTime: Infinity,
+  });
+}
+
+export function useExerciseFilterOptions() {
+  return useQuery({
+    queryKey: FILTER_OPTIONS,
+    queryFn: getExerciseFilterOptions,
+    staleTime: 10 * 60_000,
   });
 }
 
@@ -104,4 +114,3 @@ export function useSetAlternatives(id: string) {
 }
 
 // ─── Sync hooks ───────────────────────────────────────────────────────────────
-

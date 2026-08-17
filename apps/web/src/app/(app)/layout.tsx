@@ -7,6 +7,7 @@ import clsx from "clsx";
 import { Icon, FmStyles, FmPageLoader } from "@/components/fm";
 import { useLang, useT } from "@/lib/lang-context";
 import { SettingsProvider, useSettings } from "@/lib/settings-context";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import { AccountPopup } from "@/features/settings";
 import { useUserProfile } from "@/features/programs";
 import { isOnboardingComplete } from "@/features/onboarding";
@@ -14,6 +15,7 @@ import { ActiveWorkoutWidget } from "@/features/workouts/components/ActiveWorkou
 import { AiCoachWidget } from "@/features/ai-coach";
 import s from "./layout.module.css";
 
+const AI_COACHING_ENABLED = isFeatureEnabled("ai-coaching");
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -75,7 +77,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
       {/* Resume-workout affordance — floats above every page except the
           active session's own page. */}
       <ActiveWorkoutWidget />
-      <AiCoachWidget />
+      {AI_COACHING_ENABLED && <AiCoachWidget />}
 
       {/* Bottom Tab Bar */}
       <nav className={s.tabBar}>

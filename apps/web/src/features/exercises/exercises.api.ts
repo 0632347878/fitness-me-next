@@ -36,9 +36,16 @@ export type ExercisesQuery = {
   mechanic?: string;
   force?: string;
   difficulty?: string;
+  muscleGroup?: string;
   page?: number;
   limit?: number;
   lang?: string;
+};
+
+export type ExerciseFilterOptions = {
+  difficulties: string[];
+  muscleGroups: string[];
+  equipment: string[];
 };
 
 export async function getExercises(params: ExercisesQuery): Promise<ExercisesPage> {
@@ -53,6 +60,11 @@ export async function getExercise(id: string): Promise<Exercise> {
 
 export async function getEquipmentList(): Promise<string[]> {
   const res = await apiClient.get<string[]>("/exercises/equipment");
+  return res.data;
+}
+
+export async function getExerciseFilterOptions(): Promise<ExerciseFilterOptions> {
+  const res = await apiClient.get<ExerciseFilterOptions>("/exercises/filter-options");
   return res.data;
 }
 
@@ -114,4 +126,3 @@ export async function setAlternatives(
 }
 
 // ─── Admin Sync ───────────────────────────────────────────────────────────────
-

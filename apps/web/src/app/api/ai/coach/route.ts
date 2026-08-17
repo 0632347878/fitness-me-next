@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -109,6 +110,10 @@ function extractOutputText(response: OpenAIResponse) {
 }
 
 export async function POST(request: Request) {
+  if (!isFeatureEnabled("ai-coaching")) {
+    return Response.json({ error: "Not found" }, { status: 404 });
+  }
+
   const authHeader = request.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });

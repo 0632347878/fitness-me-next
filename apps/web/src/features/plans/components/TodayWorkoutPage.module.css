@@ -135,9 +135,20 @@
   font-size: 15px;
   font-weight: 700;
   color: var(--fm-text-primary);
+  text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.name:hover {
+  color: var(--fm-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.name:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--fm-accent);
+  outline-offset: 3px;
 }
 .swapBadge {
   font-size: 9px;
