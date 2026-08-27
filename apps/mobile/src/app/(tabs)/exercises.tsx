@@ -1,0 +1,13 @@
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Screen, Title } from "@/components/ui";
+import { colors } from "@/constants/fitme-theme";
+import { fitnessApi } from "@/lib/fitness-api";
+
+const categories = ["", "STRENGTH", "CARDIO", "MOBILITY", "FLEXIBILITY"];
+export default function Exercises() {
+  const [search, setSearch] = useState(""); const [category, setCategory] = useState(""); const query = useQuery({ queryKey: ["exercises", search, category], queryFn: () => fitnessApi.exercises(search, category) });
+  return <Screen><Title sub="Find the right movement">Exercises</Title><TextInput value={search} onChangeText={setSearch} placeholder="Search exercises" placeholderTextColor={colors.muted} style={s.search}/><View style={s.filters}>{categories.map((c) => <Pressable key={c || "all"} onPress={() => setCategory(c)} style={[s.pill, category === c && s.active]}><Text style={[s.pillText, category === c && s.activeText]}>{c || "ALL"}</Text></Pressable>)}</View>{query.error ? <Text style={s.error}>{query.error.message}</Text> : null}<FlatList data={query.data?.items ?? []} keyExtractor={(x) => x.id} contentContainerStyle={{ gap: 10, paddingVertical: 14 }} renderItem={({ item }) => <View style={s.card}><View style={{ flex: 1 }}><Text style={s.name}>{item.name}</Text><Text style={s.meta}>{item.muscleGroups.join(" · ") || "Full body"}</Text></View><Text style={s.category}>{item.category}</Text></View>} ListEmptyComponent={!query.isLoading ? <Text style={s.meta}>No exercises found.</Text> : null}/></Screen>;
+}
+const s = StyleSheet.create({ search: { color: colors.text, backgroundColor: colors.input, borderWidth: 1, borderColor: colors.border, minHeight: 48, borderRadius: 12, paddingHorizontal: 14 }, filters: { flexDirection: "row", flexWrap: "wrap", gap: 7, marginTop: 12 }, pill: { paddingHorizontal: 10, paddingVertical: 7, borderWidth: 1, borderColor: colors.border, borderRadius: 99 }, active: { backgroundColor: colors.accent, borderColor: colors.accent }, pillText: { color: colors.sub, fontSize: 9, fontWeight: "800" }, activeText: { color: colors.bg }, card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 15, borderRadius: 15, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.card }, name: { color: colors.text, fontSize: 16, fontWeight: "800" }, meta: { color: colors.sub, fontSize: 12, marginTop: 3 }, category: { color: colors.accent, fontWeight: "800", fontSize: 9 }, error: { color: colors.danger, marginTop: 10 } });

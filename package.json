@@ -1,14 +1,17 @@
 {
   "name": "fitness-me-next",
   "version": "1.0.0",
-  "description": "",
-  "main": "dist/index.js",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "engines": { "node": ">=20.19.4" },
   "scripts": {
-    "build": "tsc"
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint"
   },
-  "dependencies": {},
   "devDependencies": {
-    "typescript": "^5.5.3"
-  },
-  "private": true
+    "turbo": "^2.5.0",
+    "typescript": "^6.0.3"
+  }
 }

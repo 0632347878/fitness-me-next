@@ -329,14 +329,16 @@ Components: `Button Input Label Card Badge DataTable StatCard LineChart PageHead
 
 **Goal:** Expo (SDK 52+) React Native app sharing Zod schemas and types from `packages/shared`.
 
+> **Implemented (2026-08-23):** базовая миграция выполнена на Expo SDK 57 / React Native 0.86. Требуется Node `>=20.19.4`.
+
 ### 5.1 — Scaffold
 
 | # | Task |
 |---|---|
-| 5.1.1 | `pnpm create expo-app mobile --template blank-typescript` inside `apps/` |
-| 5.1.2 | Install: `expo-router nativewind react-native-reanimated @tanstack/react-query react-hook-form zod expo-secure-store` |
-| 5.1.3 | Workspace dep: `@fitness-me/shared` |
-| 5.1.4 | Configure Metro bundler to resolve workspace packages (`resolver.unstable_enablePackageExports`) |
+| 5.1.1 | ✅ Expo SDK 57 app created in `apps/mobile` |
+| 5.1.2 | ✅ Expo Router, Reanimated, TanStack Query, React Hook Form, Zod and SecureStore installed |
+| 5.1.3 | ✅ Workspace dep: `@fitness-me/shared` |
+| 5.1.4 | ✅ Metro configured for workspace package exports |
 
 ### 5.2 — Mobile screens (Expo Router file-based)
 
@@ -359,6 +361,8 @@ apps/mobile/app/
 - Offline-first log (AsyncStorage queue) — Phase 6
 
 **Done when:** App boots on iOS Simulator/Android Emulator; login → log workout → view history works.
+
+**Current status:** auth, dashboard, workout history + freestyle set logger, exercises and metrics are implemented and pass TypeScript. Simulator smoke test remains pending on a Node 20+ development machine.
 
 ---
 

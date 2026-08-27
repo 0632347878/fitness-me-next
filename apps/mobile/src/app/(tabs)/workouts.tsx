@@ -1,0 +1,12 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Button, Card, Screen, Title } from "@/components/ui";
+import { colors } from "@/constants/fitme-theme";
+import { fitnessApi } from "@/lib/fitness-api";
+
+export default function Workouts() {
+  const qc = useQueryClient(); const query = useQuery({ queryKey: ["workouts"], queryFn: fitnessApi.workouts }); const start = useMutation({ mutationFn: fitnessApi.startWorkout, onSuccess: (w) => { qc.invalidateQueries({ queryKey: ["workouts"] }); router.push(`/workouts/${w.id}`); } }); const workouts = query.data ?? []; const active = workouts.find((w) => !w.finishedAt); const history = workouts.filter((w) => w.finishedAt).sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  return <Screen><ScrollView refreshControl={<RefreshControl refreshing={query.isRefetching} onRefresh={query.refetch} tintColor={colors.accent}/>} contentContainerStyle={{ gap: 12, paddingBottom: 20 }}><Title sub="Every set counts">Workouts</Title>{active ? <Card><Text style={s.kicker}>IN PROGRESS</Text><Text style={s.name}>Current workout</Text><Text style={s.meta}>{active.sets.length} sets logged</Text><Button title="Continue workout" onPress={() => router.push(`/workouts/${active.id}`)}/></Card> : <Button title="Start freestyle workout" busy={start.isPending} onPress={() => start.mutate()}/>}<Text style={s.section}>History</Text>{history.map((w) => <Card key={w.id}><View style={s.row}><View style={{ flex: 1 }}><Text style={s.name}>{new Date(w.startedAt).toLocaleDateString()}</Text><Text style={s.meta}>{new Set(w.sets.map((x) => x.exercise.id)).size} exercises</Text></View><Text style={s.sets}>{w.sets.length}<Text style={s.meta}> sets</Text></Text></View></Card>)}{!query.isLoading && history.length === 0 ? <Text style={s.meta}>Complete your first workout to build history.</Text> : null}</ScrollView></Screen>;
+}
+const s = StyleSheet.create({ kicker: { color: colors.accent, fontSize: 10, fontWeight: "900", letterSpacing: 1 }, name: { color: colors.text, fontSize: 17, fontWeight: "800" }, meta: { color: colors.sub, fontSize: 12 }, section: { color: colors.text, fontWeight: "900", textTransform: "uppercase", marginTop: 10 }, row: { flexDirection: "row", alignItems: "center" }, sets: { color: colors.text, fontSize: 22, fontWeight: "900" } });

@@ -4,7 +4,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   turbopack: {
-    root: path.join(__dirname),
+    // pnpm hoists Next.js and shared workspace packages to the monorepo root.
+    root: path.join(__dirname, "../.."),
   },
   images: {
     remotePatterns: [
